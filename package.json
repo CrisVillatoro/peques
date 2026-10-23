@@ -6,6 +6,7 @@
     "build": "next build",
     "dev": "next dev",
     "fix-coordinates": "node scripts/fix-coordinates.mjs",
+    "import-berlin": "node scripts/import-berlin.mjs",
     "import-food": "node scripts/import-food.mjs",
     "import-places": "node scripts/import-osm.mjs",
     "start": "next start"
