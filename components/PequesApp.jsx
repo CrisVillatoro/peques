@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { distanceKm, rankPlaces, weatherSentence, whySentence } from "../lib/rules";
+import { countBySource, mergePlaces } from "../lib/merge";
 import { fetchWeather, FORECAST_DAYS } from "../lib/weather";
 import { QUICK_PLACES, RADIUS_OPTIONS, searchPlaces } from "../lib/geocode";
 import {
@@ -44,7 +45,9 @@ function ageLabel(months) {
   return m ? `${y}y ${m}m` : `${y}y`;
 }
 
-export default function PequesApp({ places, food }) {
+export default function PequesApp({ places: seedPlaces, food }) {
+  const [imported, setImported] = useState([]);
+  const [library, setLibrary] = useState("loading"); // loading | ready | seed-only
   const [kids, setKids] = useState(DEFAULT_KIDS);
   const [choice, setChoice] = useState("auto");
   const [dateIso, setDateIso] = useState(() => isoDate(new Date()));
@@ -94,6 +97,25 @@ export default function PequesApp({ places, food }) {
   }, [origin, maxKm]);
 
   const withAges = useMemo(() => kids.map((k) => ({ ...k, months: monthsSince(k.birth) })), [kids]);
+
+  // the imported OpenStreetMap library lives outside the app bundle, so the
+  // page opens fast and the big file is fetched once and cached by the browser
+  useEffect(() => {
+    let cancelled = false;
+    fetch("places-osm.json")
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error("not found"))))
+      .then((d) => {
+        if (cancelled) return;
+        const list = Array.isArray(d.places) ? d.places : [];
+        setImported(list);
+        setLibrary(list.length ? "ready" : "seed-only");
+      })
+      .catch(() => !cancelled && setLibrary("seed-only"));
+    return () => { cancelled = true; };
+  }, []);
+
+  const places = useMemo(() => mergePlaces(seedPlaces, imported), [seedPlaces, imported]);
+  const counts = useMemo(() => countBySource(places), [places]);
 
   const loadWeather = useCallback(async (point, at) => {
     try {
@@ -330,7 +352,11 @@ export default function PequesApp({ places, food }) {
         <button className="find" type="button" onClick={find} disabled={phase === "searching"}>
           <span>
             Find something
-            <small>{ranking.total} place{ranking.total === 1 ? "" : "s"} open {whenLabel}</small>
+            <small>
+              {library === "loading"
+                ? "loading places…"
+                : `${ranking.total} place${ranking.total === 1 ? "" : "s"} open ${whenLabel}`}
+            </small>
           </span>
           <span className="go" aria-hidden="true">→</span>
         </button>
@@ -395,6 +421,14 @@ export default function PequesApp({ places, food }) {
       </section>
 
       <footer className="footer">
+        {library === "ready" && (
+          <>Searching {counts.total.toLocaleString("en-GB")} places: {counts.curated} written by hand,{" "}
+          {counts.osm.toLocaleString("en-GB")} imported from OpenStreetMap. · </>
+        )}
+        {library === "seed-only" && (
+          <>Only the {counts.curated} hand-written places are loaded — run <code>npm run import-places</code> to add the
+          rest. · </>
+        )}
         Peques v0.1 · Places are a hand-written starter list: opening hours are typical values, always check the
         venue&apos;s own page. Weather from <a href="https://open-meteo.com/">Open-Meteo</a> (DWD ICON model). Address
         search and imported places come from <a href="https://www.openstreetmap.org/copyright">OpenStreetMap

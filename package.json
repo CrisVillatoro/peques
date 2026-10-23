@@ -3,11 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "dev": "next dev",
     "fix-coordinates": "node scripts/fix-coordinates.mjs",
-    "import-food": "node scripts/import-food.mjs"
+    "import-food": "node scripts/import-food.mjs",
+    "import-places": "node scripts/import-osm.mjs",
+    "start": "next start"
   },
   "dependencies": {
     "leaflet": "1.9.4",
