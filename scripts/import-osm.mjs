@@ -10,16 +10,11 @@
  *
  * Data © OpenStreetMap contributors, ODbL. Keep the credit in the app footer.
  */
-import { writeFile, mkdir } from "node:fs/promises";
+import { writeFile, mkdir, readFile } from "node:fs/promises";
+import { overpass, sleep } from "./lib/overpass.mjs";
 
 const OUT = new URL("../public/places-osm.json", import.meta.url);
-const ENDPOINTS = [
-  "https://overpass-api.de/api/interpreter",
-  "https://overpass.kumi.systems/api/interpreter",
-];
 const AREA = 'area["name"="Berlin"]["admin_level"="4"]->.berlin;';
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-
 /**
  * Each group: what to ask Overpass for, and what we know about that kind of
  * place without reading anything else. `fit` is per age band (1 = no, 5 = great)
@@ -145,20 +140,42 @@ const only = [...args].find((a) => a.startsWith("--only="))?.split("=")[1];
 const all = [];
 const summary = [];
 
+let failures = 0;
+
 for (const group of GROUPS) {
   if (only && group.id !== only) continue;
   process.stdout.write(`${group.label}… `);
   try {
-    const elements = await overpass(`[out:json][timeout:180];${AREA}(${group.query});out center tags;`);
+    const elements = await overpass(`[out:json][timeout:180];${AREA}(${group.query});out center tags qt;`, {
+      onRetry: (n, secs, why) => process.stdout.write(`[${why}, retry ${n} in ${secs}s] `),
+    });
     const mapped = elements.map((el) => toPlace(el, group)).filter(Boolean);
     all.push(...mapped);
     summary.push([group.label, mapped.length]);
     console.log(`${mapped.length}`);
   } catch (error) {
+    failures++;
     console.log(`failed (${error.message})`);
     summary.push([group.label, "failed"]);
   }
-  await sleep(2500); // Overpass is a free shared service — be gentle
+  await sleep(4000); // between categories: Overpass is a free shared service
+}
+
+if (!all.length) {
+  console.log("\nNothing was imported, so public/places-osm.json was left untouched.");
+  console.log("Overpass was busy or unreachable. Wait a few minutes and run it again,");
+  console.log("or try one category first:  npm run import-places -- --only=playground");
+  process.exit(1);
+}
+
+if (failures) {
+  const existing = await readExisting();
+  if (existing.length) {
+    const fresh = new Set(all.map((p) => p.id));
+    const kept = existing.filter((p) => !fresh.has(p.id));
+    console.log(`\n${failures} categor${failures === 1 ? "y" : "ies"} failed — keeping ${kept.length} places from the last run.`);
+    all.push(...kept);
+  }
 }
 
 const places = dedupe(all);
@@ -185,25 +202,13 @@ console.log(`Written to public/places-osm.json (${(JSON.stringify(places).length
 
 /* ---------------- helpers ---------------- */
 
-async function overpass(query) {
-  let lastError;
-  for (const endpoint of ENDPOINTS) {
-    try {
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({ data: query }),
-      });
-      if (res.status === 429 || res.status === 504) throw new Error(`busy (${res.status})`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      return data.elements || [];
-    } catch (error) {
-      lastError = error;
-      await sleep(3000);
-    }
+async function readExisting() {
+  try {
+    const raw = JSON.parse(await readFile(OUT, "utf8"));
+    return Array.isArray(raw.places) ? raw.places : [];
+  } catch {
+    return [];
   }
-  throw lastError;
 }
 
 function toPlace(el, group) {
