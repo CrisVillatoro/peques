@@ -14,7 +14,11 @@ import { writeFile, mkdir, readFile } from "node:fs/promises";
 import { overpass, sleep } from "./lib/overpass.mjs";
 
 const OUT = new URL("../public/places-osm.json", import.meta.url);
-const AREA = 'area["name"="Berlin"]["admin_level"="4"]->.berlin;';
+// Berlin's bounding box. An area lookup (area["name"="Berlin"]) only works on
+// mirrors that build an area index, which is why some of them quietly return
+// nothing; a bbox works everywhere.
+const BBOX = "52.3383,13.0884,52.6755,13.7612";
+const AREA = "";
 /**
  * Each group: what to ask Overpass for, and what we know about that kind of
  * place without reading anything else. `fit` is per age band (1 = no, 5 = great)
@@ -24,7 +28,7 @@ const GROUPS = [
   {
     id: "playground",
     label: "Playground",
-    query: `nwr["leisure"="playground"](area.berlin);`,
+    query: `nwr["leisure"="playground"](${BBOX});`,
     setting: "outdoor", covered: 0,
     fit: { b: 2, t: 5, p: 5, s: 4 },
     free: true, price: "Free",
@@ -33,9 +37,9 @@ const GROUPS = [
   {
     id: "indoor-play",
     label: "Indoor playground",
-    query: `nwr["leisure"="indoor_play"](area.berlin);
-            nwr["leisure"="playground"]["indoor"="yes"](area.berlin);
-            nwr["amenity"="indoor_play"](area.berlin);`,
+    query: `nwr["leisure"="indoor_play"](${BBOX});
+            nwr["leisure"="playground"]["indoor"="yes"](${BBOX});
+            nwr["amenity"="indoor_play"](${BBOX});`,
     setting: "indoor", covered: 1,
     fit: { b: 2, t: 5, p: 5, s: 4 },
     free: false, price: "€€",
@@ -44,9 +48,8 @@ const GROUPS = [
   {
     id: "farm",
     label: "City farm",
-    query: `nwr["name"~"Kinderbauernhof|Jugendfarm|Tierhof",i](area.berlin);
-            nwr["attraction"="animal"](area.berlin);
-            nwr["tourism"="farm"](area.berlin);`,
+    query: `nwr["name"~"Kinderbauernhof|Jugendfarm|Kinderfarm|Tierhof|Streichelzoo",i](${BBOX});
+            nwr["tourism"="farm"]["name"](${BBOX});`,
     setting: "outdoor", covered: 0.2,
     fit: { b: 3, t: 5, p: 5, s: 4 },
     free: true, price: "Free",
@@ -55,8 +58,8 @@ const GROUPS = [
   {
     id: "zoo",
     label: "Zoo / animal park",
-    query: `nwr["tourism"="zoo"](area.berlin);
-            nwr["tourism"="aquarium"](area.berlin);`,
+    query: `nwr["tourism"="zoo"](${BBOX});
+            nwr["tourism"="aquarium"](${BBOX});`,
     setting: "mixed", covered: 0.4,
     fit: { b: 3, t: 5, p: 5, s: 5 },
     free: false, price: "€€",
@@ -65,7 +68,7 @@ const GROUPS = [
   {
     id: "library",
     label: "Library",
-    query: `nwr["amenity"="library"](area.berlin);`,
+    query: `nwr["amenity"="library"](${BBOX});`,
     setting: "indoor", covered: 1,
     fit: { b: 4, t: 4, p: 5, s: 5 },
     free: true, price: "Free",
@@ -74,7 +77,7 @@ const GROUPS = [
   {
     id: "museum",
     label: "Museum",
-    query: `nwr["tourism"="museum"](area.berlin);`,
+    query: `nwr["tourism"="museum"](${BBOX});`,
     setting: "indoor", covered: 1,
     fit: { b: 1, t: 2, p: 4, s: 5 },
     free: false, price: "€€",
@@ -83,10 +86,10 @@ const GROUPS = [
   {
     id: "pool",
     label: "Swimming",
-    query: `nwr["leisure"="water_park"](area.berlin);
-            nwr["amenity"="public_bath"](area.berlin);
-            nwr["leisure"="swimming_pool"]["access"!="private"](area.berlin);
-            nwr["leisure"="sports_centre"]["sport"="swimming"](area.berlin);`,
+    query: `nwr["leisure"="water_park"](${BBOX});
+            nwr["amenity"="public_bath"](${BBOX});
+            nwr["leisure"="swimming_pool"]["access"!="private"](${BBOX});
+            nwr["leisure"="sports_centre"]["sport"="swimming"](${BBOX});`,
     setting: "indoor", covered: 1,
     fit: { b: 4, t: 5, p: 5, s: 5 },
     free: false, price: "€",
@@ -95,8 +98,8 @@ const GROUPS = [
   {
     id: "lake",
     label: "Lake / beach",
-    query: `nwr["leisure"="beach_resort"](area.berlin);
-            nwr["natural"="beach"](area.berlin);`,
+    query: `nwr["leisure"="beach_resort"](${BBOX});
+            nwr["natural"="beach"](${BBOX});`,
     setting: "outdoor", covered: 0,
     fit: { b: 3, t: 5, p: 5, s: 5 },
     free: true, price: "Free",
@@ -105,8 +108,8 @@ const GROUPS = [
   {
     id: "park",
     label: "Park / garden",
-    query: `nwr["leisure"="park"]["name"](area.berlin);
-            nwr["leisure"="garden"]["garden:type"="botanical"](area.berlin);`,
+    query: `nwr["leisure"="park"]["name"](${BBOX});
+            nwr["leisure"="garden"]["garden:type"="botanical"](${BBOX});`,
     setting: "outdoor", covered: 0,
     fit: { b: 3, t: 4, p: 4, s: 4 },
     free: true, price: "Free",
@@ -115,8 +118,8 @@ const GROUPS = [
   {
     id: "theatre",
     label: "Children's theatre",
-    query: `nwr["amenity"="theatre"]["theatre:genre"~"children|puppet",i](area.berlin);
-            nwr["amenity"="theatre"]["name"~"Kinder|Puppen|Figuren",i](area.berlin);`,
+    query: `nwr["amenity"="theatre"]["theatre:genre"~"children|puppet",i](${BBOX});
+            nwr["amenity"="theatre"]["name"~"Kinder|Puppen|Figuren",i](${BBOX});`,
     setting: "indoor", covered: 1,
     fit: { b: 1, t: 3, p: 5, s: 5 },
     free: false, price: "€",
@@ -125,8 +128,8 @@ const GROUPS = [
   {
     id: "family-centre",
     label: "Family centre",
-    query: `nwr["amenity"="community_centre"]["name"~"Familienzentrum|Kinder|Eltern|Nachbarschaftshaus",i](area.berlin);
-            nwr["social_facility"="outreach"]["name"~"Familien|Kinder",i](area.berlin);`,
+    query: `nwr["amenity"="community_centre"]["name"~"Familienzentrum|Kinder|Eltern|Nachbarschaftshaus",i](${BBOX});
+            nwr["social_facility"="outreach"]["name"~"Familien|Kinder",i](${BBOX});`,
     setting: "indoor", covered: 1,
     fit: { b: 5, t: 5, p: 4, s: 3 },
     free: true, price: "Free",
@@ -146,13 +149,13 @@ for (const group of GROUPS) {
   if (only && group.id !== only) continue;
   process.stdout.write(`${group.label}… `);
   try {
-    const elements = await overpass(`[out:json][timeout:180];${AREA}(${group.query});out center tags qt;`, {
+    const elements = await overpass(`[out:json][timeout:180];(${group.query});out center tags qt;`, {
       onRetry: (n, secs, why) => process.stdout.write(`[${why}, retry ${n} in ${secs}s] `),
     });
     const mapped = elements.map((el) => toPlace(el, group)).filter(Boolean);
     all.push(...mapped);
     summary.push([group.label, mapped.length]);
-    console.log(`${mapped.length}`);
+    console.log(mapped.length === 0 ? "0  ← nothing came back, worth re-running" : `${mapped.length}`);
   } catch (error) {
     failures++;
     console.log(`failed (${error.message})`);
