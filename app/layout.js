@@ -1,10 +1,10 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "Berlin Family Scout",
-  description: "What can we do with the kids today? One tap, for Berlin families.",
+  title: "Peques",
+  description: "What shall we do today? Good things to do with the little ones in Berlin.",
   manifest: "/manifest.webmanifest",
-  appleWebApp: { capable: true, title: "Scout", statusBarStyle: "default" },
+  appleWebApp: { capable: true, title: "Peques", statusBarStyle: "default" },
 };
 
 export const viewport = {

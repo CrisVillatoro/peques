@@ -1,6 +1,8 @@
-# Berlin Family Scout — v0.1
+# Peques — v0.1
 
-What can we do with the kids today? Open the app, tap **Scout now**, get one good
+*Good things to do with the little ones in Berlin, today.*
+
+What can we do with the kids today? Open the app, tap **Find something**, get one good
 suggestion plus two backups — chosen for the kids who are with you, the weather,
 and how far you want to travel.
 
@@ -14,7 +16,7 @@ the same way Iris is deployed.
 ## 1. Get it running on your Mac (5 minutes)
 
 ```bash
-cd ~/Documents/berlin-family-scout
+cd ~/Documents/peques
 npm install
 npm run dev
 ```
@@ -67,7 +69,7 @@ npm run build
 This creates a folder called **`out/`** with plain HTML, CSS and JavaScript —
 no server needed.
 
-1. Decide the address, e.g. `scout.cristavillatoro.com`.
+1. Decide the address, e.g. `peques.cristavillatoro.com`.
 2. In IONOS, create that subdomain and point it at its own folder in your
    webspace (the same setup you used for Iris).
 3. Upload **the contents of `out/`** (not the folder itself) into that folder,
@@ -102,7 +104,7 @@ from the footer — a public page on a German domain normally needs both.
 | `data/food.json` | Kid-friendly places to eat, imported from OpenStreetMap. |
 | `lib/rules.js` | Weather rules, age-fit scoring, travel estimates. All plain code. |
 | `lib/weather.js` | Fetches the forecast in the browser (Open-Meteo, DWD model). |
-| `components/ScoutApp.jsx` | The whole interface. |
+| `components/PequesApp.jsx` | The whole interface. |
 | `components/Art.jsx` | The little illustrations, drawn in code — no image files. |
 | `scripts/fix-coordinates.mjs` | One-time coordinate fix via OpenStreetMap. |
 | `scripts/import-food.mjs` | Imports kid-friendly cafés from OpenStreetMap. |

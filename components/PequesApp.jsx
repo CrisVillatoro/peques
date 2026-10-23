@@ -6,7 +6,7 @@ import { fetchWeather } from "../lib/weather";
 import Art from "./Art";
 
 const BERLIN = { lat: 52.5234, lon: 13.4113 }; // fallback: Prenzlauer Berg-ish
-const KIDS_KEY = "scout.kids.v1";
+const KIDS_KEY = "peques.kids.v1";
 
 const DEFAULT_KIDS = [
   { id: "k1", name: "Little one", birth: isoMonthsAgo(28), coming: true, colour: "#FFC845" },
@@ -32,7 +32,7 @@ function ageLabel(months) {
   return m ? `${y}y ${m}m` : `${y}y`;
 }
 
-export default function ScoutApp({ places, food }) {
+export default function PequesApp({ places, food }) {
   const [kids, setKids] = useState(DEFAULT_KIDS);
   const [choice, setChoice] = useState("auto");
   const [origin, setOrigin] = useState(null);
@@ -196,7 +196,7 @@ export default function ScoutApp({ places, food }) {
 
       <button className="scout" type="button" onClick={scout} disabled={phase === "searching"}>
         <span>
-          Scout now
+          Find something
           <small>{ranking.total} places open near you right now</small>
         </span>
         <span className="go" aria-hidden="true">→</span>
@@ -234,7 +234,7 @@ export default function ScoutApp({ places, food }) {
       )}
 
       <p className="footer">
-        Scout v0.1 · Places are a hand-written starter list: opening hours are typical values, always check the
+        Peques v0.1 · Places are a hand-written starter list: opening hours are typical values, always check the
         venue&apos;s own page. Weather from <a href="https://open-meteo.com/">Open-Meteo</a> (DWD ICON model). Place data you import
         comes from <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>. Your children&apos;s
         birth months stay in this browser; nothing is sent to a server.

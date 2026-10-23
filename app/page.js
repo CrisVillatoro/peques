@@ -1,7 +1,7 @@
-import ScoutApp from "../components/ScoutApp";
+import PequesApp from "../components/PequesApp";
 import placesData from "../data/places.json";
 import foodData from "../data/food.json";
 
 export default function Page() {
-  return <ScoutApp places={placesData.places} food={foodData.places} />;
+  return <PequesApp places={placesData.places} food={foodData.places} />;
 }
