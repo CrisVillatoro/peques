@@ -2,11 +2,22 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { distanceKm, rankPlaces, weatherSentence, whySentence } from "../lib/rules";
-import { fetchWeather } from "../lib/weather";
+import { fetchWeather, FORECAST_DAYS } from "../lib/weather";
+import { QUICK_PLACES, RADIUS_OPTIONS, searchPlaces } from "../lib/geocode";
+import {
+  dayOptions,
+  daysAhead,
+  defaultSlot,
+  describeWhen,
+  isoDate,
+  resolveWhen,
+  slotsFor,
+} from "../lib/when";
 import Art from "./Art";
 
-const BERLIN = { lat: 52.5234, lon: 13.4113 }; // fallback: Prenzlauer Berg-ish
+const BERLIN = { lat: 52.5234, lon: 13.4113, label: "Berlin (centre)" };
 const KIDS_KEY = "peques.kids.v1";
+const PLACE_KEY = "peques.origin.v1";
 
 const DEFAULT_KIDS = [
   { id: "k1", name: "Little one", birth: isoMonthsAgo(28), coming: true, colour: "#FFC845" },
@@ -35,78 +46,121 @@ function ageLabel(months) {
 export default function PequesApp({ places, food }) {
   const [kids, setKids] = useState(DEFAULT_KIDS);
   const [choice, setChoice] = useState("auto");
-  const [origin, setOrigin] = useState(null);
+  const [dateIso, setDateIso] = useState(() => isoDate(new Date()));
+  const [slotKey, setSlotKey] = useState(() => defaultSlot());
+  const [origin, setOrigin] = useState(BERLIN);
+  const [maxKm, setMaxKm] = useState(5);
+  const [showWhere, setShowWhere] = useState(false);
+  const [query, setQuery] = useState("");
+  const [hits, setHits] = useState([]);
+  const [searching, setSearching] = useState(false);
+  const [searchError, setSearchError] = useState(null);
   const [locating, setLocating] = useState(false);
   const [weather, setWeather] = useState(null);
   const [weatherError, setWeatherError] = useState(null);
   const [phase, setPhase] = useState("home"); // home | searching | results
   const [openId, setOpenId] = useState(null);
 
-  // remember the kids on this device only
+  const days = useMemo(() => dayOptions(new Date()), []);
+  const slots = useMemo(() => slotsFor(dateIso, new Date()), [dateIso]);
+  const when = useMemo(() => resolveWhen(dateIso, slotKey, new Date()), [dateIso, slotKey]);
+  const whenLabel = describeWhen(when, dateIso, slotKey, new Date());
+  const tooFarForWeather = daysAhead(dateIso, new Date()) >= FORECAST_DAYS;
+
+  useEffect(() => {
+    if (!slots.some((s) => s.key === slotKey)) setSlotKey(slots[0].key);
+  }, [slots, slotKey]);
+
+  // remember kids and the last place, on this device only
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(KIDS_KEY);
-      if (raw) setKids(JSON.parse(raw));
+      const k = localStorage.getItem(KIDS_KEY);
+      if (k) setKids(JSON.parse(k));
+      const o = localStorage.getItem(PLACE_KEY);
+      if (o) {
+        const saved = JSON.parse(o);
+        if (saved?.origin?.lat) setOrigin(saved.origin);
+        if (saved?.maxKm !== undefined) setMaxKm(saved.maxKm);
+      }
     } catch (e) { /* private window, ignore */ }
   }, []);
   useEffect(() => {
     try { localStorage.setItem(KIDS_KEY, JSON.stringify(kids)); } catch (e) { /* ignore */ }
   }, [kids]);
+  useEffect(() => {
+    try { localStorage.setItem(PLACE_KEY, JSON.stringify({ origin, maxKm })); } catch (e) { /* ignore */ }
+  }, [origin, maxKm]);
 
-  const withAges = useMemo(
-    () => kids.map((k) => ({ ...k, months: monthsSince(k.birth) })),
-    [kids]
-  );
+  const withAges = useMemo(() => kids.map((k) => ({ ...k, months: monthsSince(k.birth) })), [kids]);
 
-  const loadWeather = useCallback(async (point) => {
+  const loadWeather = useCallback(async (point, at) => {
     try {
-      setWeather(await fetchWeather(point));
+      setWeather(await fetchWeather(point, { at }));
       setWeatherError(null);
     } catch (e) {
       setWeather(null);
-      setWeatherError("No live weather right now");
+      setWeatherError(
+        daysAhead(isoDate(at)) >= FORECAST_DAYS
+          ? `No forecast that far ahead (about ${FORECAST_DAYS} days)`
+          : "No weather for that time"
+      );
     }
   }, []);
 
   const locate = useCallback(() => {
-    if (!navigator.geolocation) {
-      setOrigin(BERLIN);
-      loadWeather(BERLIN);
-      return;
-    }
+    if (!navigator.geolocation) return;
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const point = { lat: pos.coords.latitude, lon: pos.coords.longitude };
-        setOrigin(point);
+        setOrigin({ lat: pos.coords.latitude, lon: pos.coords.longitude, label: "Where I am" });
         setLocating(false);
-        loadWeather(point);
+        setShowWhere(false);
       },
-      () => {
-        setOrigin(BERLIN);
-        setLocating(false);
-        loadWeather(BERLIN);
-      },
+      () => setLocating(false),
       { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 }
     );
-  }, [loadWeather]);
+  }, []);
 
   useEffect(() => { locate(); }, [locate]);
+  useEffect(() => { loadWeather(origin, when); }, [origin, when, loadWeather]);
+
+  const runSearch = async (e) => {
+    e?.preventDefault();
+    if (query.trim().length < 3) return;
+    setSearching(true);
+    setSearchError(null);
+    try {
+      const found = await searchPlaces(query);
+      setHits(found);
+      if (!found.length) setSearchError("Nothing found in Berlin for that.");
+    } catch (err) {
+      setSearchError("Search is unavailable right now — try a district below.");
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  const pickPlace = (p) => {
+    setOrigin({ lat: p.lat, lon: p.lon, label: p.name });
+    setHits([]);
+    setQuery("");
+    setShowWhere(false);
+  };
 
   const ranking = useMemo(
-    () => rankPlaces({ places, origin: origin || BERLIN, kids: withAges, choice, weather }),
-    [places, origin, withAges, choice, weather]
+    () => rankPlaces({ places, origin, kids: withAges, choice, weather, now: when, maxKm }),
+    [places, origin, withAges, choice, weather, when, maxKm]
   );
 
-  const scout = () => {
+  const find = () => {
     setPhase("searching");
     setOpenId(null);
-    setTimeout(() => setPhase("results"), 700);
+    setTimeout(() => setPhase("results"), 600);
   };
 
   const speak = (r) => {
     const p = r.place;
-    const text = `Top pick: ${p.name}, ${p.where}. ${whySentence(r, ranking.mode, weather)} Typical opening until ${p.typicalClose}.`;
+    const text = `Top pick for ${whenLabel}: ${p.name}, ${p.where}. ${whySentence(r, ranking.mode, weather)} Typically open until ${p.typicalClose}.`;
     try {
       window.speechSynthesis?.cancel();
       const u = new SpeechSynthesisUtterance(text);
@@ -118,128 +172,224 @@ export default function PequesApp({ places, food }) {
   const wx = weather
     ? {
         cls: weather.rainMm >= 0.2 || weather.rainy ? "rain" : weather.tempC >= 28 ? "hot" : weather.tempC <= 3 ? "cold" : "sun",
-        text: `${Math.round(weather.tempC)}° · ${weather.condition || "now"}`,
+        icon: weather.rainMm >= 0.2 || weather.rainy ? "🌧" : weather.tempC >= 28 ? "🥵" : weather.tempC <= 3 ? "❄️" : "☀️",
+        text: `${Math.round(weather.tempC)}° · ${weather.condition}`,
       }
-    : { cls: "", text: weatherError || "checking weather…" };
+    : { cls: "", icon: "·", text: weatherError || "checking weather…" };
 
   return (
-    <main className="app">
-      <h1 className="hello">
-        {greeting()}
-        <br />
-        <em>What shall we do?</em>
-      </h1>
+    <div className="shell">
+      <header className="masthead">
+        <span className="wordmark"><i aria-hidden="true" />Peques</span>
+        <span className="tagline">Good things to do with the little ones, in Berlin</span>
+      </header>
 
-      <div className="ctx">
-        <button className="tag" onClick={locate} type="button">
-          📍 {locating ? "finding you…" : origin && origin !== BERLIN ? "Near you" : "Berlin (approx.)"}
-        </button>
-        <span className={`tag ${wx.cls}`}>{wx.cls === "rain" ? "🌧" : wx.cls === "hot" ? "🥵" : wx.cls === "cold" ? "❄️" : "☀️"} {wx.text}</span>
-      </div>
+      <section className="panel">
+        <h1 className="hello">{greeting()}<br /><em>What shall we do?</em></h1>
 
-      <p className="label">Who&apos;s coming today?</p>
-      <div className="kids">
-        {withAges.map((k) => (
-          <button
-            key={k.id}
-            type="button"
-            className="kid"
-            aria-pressed={k.coming}
-            onClick={() => setKids((all) => all.map((x) => (x.id === k.id ? { ...x, coming: !x.coming } : x)))}
-          >
-            <span className="face" style={{ background: k.colour }}>{ageLabel(k.months)}</span>
-            {k.name}
+        <div className="ctx">
+          <button className="tag" type="button" onClick={() => setShowWhere((v) => !v)} aria-expanded={showWhere}>
+            📍 {locating ? "finding you…" : origin.label} <span className="change">change</span>
           </button>
-        ))}
-        <button
-          type="button"
-          className="kid add"
-          onClick={() => {
-            const birth = window.prompt("Birth month of the child (YYYY-MM). No names needed.", isoMonthsAgo(12));
-            if (!birth || !/^\d{4}-\d{2}$/.test(birth)) return;
-            const name = window.prompt("A short label for them (optional)", "Child") || "Child";
-            setKids((all) => [
-              ...all,
-              { id: `k${Date.now()}`, name, birth, coming: true, colour: ["#9ED98B", "#B9A6F5", "#F2668B"][all.length % 3] },
-            ]);
-          }}
-        >
-          <span className="face">+</span>
-          Add
-        </button>
-      </div>
+          <span className={`tag ${wx.cls}`}>{wx.icon} {wx.text}</span>
+        </div>
 
-      <p className="label">Inside or outside?</p>
-      <div className="seg" role="radiogroup" aria-label="Indoor or outdoor">
-        {[["indoor", "Indoor"], ["auto", "Weather decides"], ["outdoor", "Outdoor"]].map(([value, label]) => (
-          <button
-            key={value}
-            type="button"
-            role="radio"
-            data-mode={value}
-            aria-checked={choice === value}
-            onClick={() => setChoice(value)}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
-      <p className="hint" aria-live="polite">
-        {choice === "auto"
-          ? weatherSentence(weather, ranking.mode)
-          : choice === "indoor"
-          ? "Only indoor places."
-          : weather && (weather.rainMm >= 0.2 || weather.rainy)
-          ? "Outdoor it is — I will show a covered option too."
-          : "Outdoor places first."}
-      </p>
+        {showWhere && (
+          <div className="where">
+            <form onSubmit={runSearch} className="searchrow">
+              <input
+                id="place-search"
+                type="search"
+                placeholder="Street, Kiez or place in Berlin"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                autoComplete="off"
+              />
+              <button type="submit" disabled={searching || query.trim().length < 3}>
+                {searching ? "…" : "Search"}
+              </button>
+            </form>
+            {searchError && <p className="hint">{searchError}</p>}
+            {hits.length > 0 && (
+              <ul className="hits">
+                {hits.map((h) => (
+                  <li key={`${h.lat},${h.lon}`}>
+                    <button type="button" onClick={() => pickPlace(h)}>
+                      <b>{h.name}</b>
+                      <small>{h.full}</small>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div className="chips">
+              <button type="button" className="chip" onClick={locate}>📍 Use my location</button>
+              {QUICK_PLACES.map((p) => (
+                <button
+                  key={p.name}
+                  type="button"
+                  className="chip small"
+                  aria-pressed={origin.label === p.name}
+                  onClick={() => pickPlace(p)}
+                >
+                  {p.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
-      <button className="scout" type="button" onClick={scout} disabled={phase === "searching"}>
-        <span>
-          Find something
-          <small>{ranking.total} places open near you right now</small>
-        </span>
-        <span className="go" aria-hidden="true">→</span>
-      </button>
-
-      {phase === "searching" && <div className="spinner" role="status" aria-label="Searching" />}
-
-      {phase === "results" && (
-        <section>
-          <p className="label" style={{ marginBottom: 0 }}>Your pick</p>
-          <p className="rtitle">{ranking.results.length ? ranking.results[0].place.name : "Nothing open right now"}</p>
-          <span className="why-chip">{weatherSentence(weather, ranking.mode)}</span>
-
-          {ranking.results.map((r, i) => (
-            <PlaceCard
-              key={r.place.id}
-              r={r}
-              rank={i}
-              mode={ranking.mode}
-              weather={weather}
-              food={food}
-              open={openId === r.place.id || i === 0}
-              onToggle={() => setOpenId(openId === r.place.id ? null : r.place.id)}
-              onSpeak={() => speak(r)}
-            />
+        <p className="label">How far?</p>
+        <div className="chips" role="group" aria-label="Search radius">
+          {RADIUS_OPTIONS.map((r) => (
+            <button
+              key={r.label}
+              type="button"
+              className="chip small"
+              aria-pressed={maxKm === r.km}
+              onClick={() => setMaxKm(r.km)}
+            >
+              {r.label}
+            </button>
           ))}
+        </div>
 
-          {!ranking.results.length && (
-            <p className="notice">
-              Nothing matches right now — most places are closed or the filters are too tight. Try
-              &ldquo;Weather decides&rdquo;, or add places to <code>data/places.json</code>.
+        <p className="label">When?</p>
+        <div className="chips" role="group" aria-label="Which day">
+          {days.map((d) => (
+            <button key={d.key} type="button" className="chip" aria-pressed={dateIso === d.date} onClick={() => setDateIso(d.date)}>
+              {d.label}
+            </button>
+          ))}
+          <label className="chip date" htmlFor="pick-date">
+            <span aria-hidden="true">📅</span>
+            <input
+              id="pick-date"
+              type="date"
+              aria-label="Pick another date"
+              value={dateIso}
+              min={isoDate(new Date())}
+              onChange={(e) => e.target.value && setDateIso(e.target.value)}
+            />
+          </label>
+        </div>
+        <div className="chips" role="group" aria-label="Time of day">
+          {slots.map((s) => (
+            <button key={s.key} type="button" className="chip small" aria-pressed={slotKey === s.key} onClick={() => setSlotKey(s.key)}>
+              {s.label}
+            </button>
+          ))}
+        </div>
+        {tooFarForWeather && (
+          <p className="hint">More than {FORECAST_DAYS} days ahead, so there is no forecast yet — results ignore the weather.</p>
+        )}
+
+        <p className="label">Who&apos;s coming?</p>
+        <div className="kids">
+          {withAges.map((k) => (
+            <button
+              key={k.id}
+              type="button"
+              className="kid"
+              aria-pressed={k.coming}
+              onClick={() => setKids((all) => all.map((x) => (x.id === k.id ? { ...x, coming: !x.coming } : x)))}
+            >
+              <span className="face" style={{ background: k.colour }}>{ageLabel(k.months)}</span>
+              {k.name}
+            </button>
+          ))}
+          <button
+            type="button"
+            className="kid add"
+            onClick={() => {
+              const birth = window.prompt("Birth month of the child (YYYY-MM). No names needed.", isoMonthsAgo(12));
+              if (!birth || !/^\d{4}-\d{2}$/.test(birth)) return;
+              const name = window.prompt("A short label for them (optional)", "Child") || "Child";
+              setKids((all) => [
+                ...all,
+                { id: `k${Date.now()}`, name, birth, coming: true, colour: ["#9ED98B", "#B9A6F5", "#F2668B"][all.length % 3] },
+              ]);
+            }}
+          >
+            <span className="face">+</span>
+            Add
+          </button>
+        </div>
+
+        <p className="label">Inside or outside?</p>
+        <div className="seg" role="radiogroup" aria-label="Indoor or outdoor">
+          {[["indoor", "Indoor"], ["auto", "Weather decides"], ["outdoor", "Outdoor"]].map(([value, label]) => (
+            <button key={value} type="button" role="radio" data-mode={value} aria-checked={choice === value} onClick={() => setChoice(value)}>
+              {label}
+            </button>
+          ))}
+        </div>
+        <p className="hint" aria-live="polite">
+          {choice === "auto"
+            ? weatherSentence(weather, ranking.mode)
+            : choice === "indoor"
+            ? "Only indoor places."
+            : weather && (weather.rainMm >= 0.2 || weather.rainy)
+            ? "Outdoor it is — I will show a covered option too."
+            : "Outdoor places first."}
+        </p>
+
+        <button className="find" type="button" onClick={find} disabled={phase === "searching"}>
+          <span>
+            Find something
+            <small>{ranking.total} place{ranking.total === 1 ? "" : "s"} open {whenLabel}</small>
+          </span>
+          <span className="go" aria-hidden="true">→</span>
+        </button>
+      </section>
+
+      <section className="results" aria-live="polite">
+        {phase === "home" && (
+          <div className="placeholder">
+            <div className="placeholder-art"><Art kind="park" /></div>
+            <p>Pick where you are, when you&apos;re going, and who&apos;s coming — then tap <b>Find something</b>.</p>
+          </div>
+        )}
+
+        {phase === "searching" && <div className="spinner" role="status" aria-label="Searching" />}
+
+        {phase === "results" && (
+          <>
+            <p className="rlabel">
+              {ranking.results.length ? "Your pick for" : "Nothing open"} {whenLabel}
+              <span>from {origin.label}{maxKm ? ` · within ${maxKm} km` : " · all Berlin"}</span>
             </p>
-          )}
-        </section>
-      )}
+            {ranking.results.map((r, i) => (
+              <PlaceCard
+                key={r.place.id}
+                r={r}
+                rank={i}
+                mode={ranking.mode}
+                weather={weather}
+                food={food}
+                open={openId === r.place.id || i === 0}
+                onToggle={() => setOpenId(openId === r.place.id ? null : r.place.id)}
+                onSpeak={() => speak(r)}
+              />
+            ))}
+            {!ranking.results.length && (
+              <p className="notice">
+                Nothing matches {whenLabel} within {maxKm ? `${maxKm} km` : "Berlin"}. Try a wider radius, another time of
+                day, or &ldquo;Weather decides&rdquo;.
+              </p>
+            )}
+          </>
+        )}
+      </section>
 
-      <p className="footer">
+      <footer className="footer">
         Peques v0.1 · Places are a hand-written starter list: opening hours are typical values, always check the
-        venue&apos;s own page. Weather from <a href="https://open-meteo.com/">Open-Meteo</a> (DWD ICON model). Place data you import
-        comes from <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>. Your children&apos;s
-        birth months stay in this browser; nothing is sent to a server.
-      </p>
-    </main>
+        venue&apos;s own page. Weather from <a href="https://open-meteo.com/">Open-Meteo</a> (DWD ICON model). Address
+        search and imported places come from <a href="https://www.openstreetmap.org/copyright">OpenStreetMap
+        contributors</a>. Your children&apos;s birth months and your last location stay in this browser; nothing is sent
+        to a server.
+      </footer>
+    </div>
   );
 }
 
@@ -255,10 +405,10 @@ function PlaceCard({ r, rank, mode, weather, food, open, onToggle, onSpeak }) {
   }, [food, p]);
 
   return (
-    <article className={`card ${rank > 0 ? "" : "top"}`}>
+    <article className={`card ${rank === 0 ? "top" : "small"}`}>
       <div className="art">
         <Art kind={p.tags?.[0] || p.setting} />
-        {rank === 0 && <span className="rank">#1 today</span>}
+        {rank === 0 && <span className="rank">Top pick</span>}
         <button className="speak" type="button" onClick={onSpeak} aria-label="Read this pick aloud">🔊</button>
       </div>
       <div className="cbody">
@@ -267,14 +417,15 @@ function PlaceCard({ r, rank, mode, weather, food, open, onToggle, onSpeak }) {
         <div className="meta">
           <span className={`m ${p.setting}`}>{p.setting === "indoor" ? "Indoor" : p.setting === "outdoor" ? "Outdoor" : "Mixed"}</span>
           <span className="m">{r.travel.minutes} min {r.travel.mode === "walk" ? "walk" : "by transit"}</span>
+          <span className="m">{r.km.toFixed(1)} km</span>
           <span className="m fit">{r.fit >= 4.5 ? "Great fit" : r.fit >= 3.5 ? "Good fit" : "OK fit"}</span>
-          <span className="m">typical until {p.typicalClose}</span>
+          <span className="m">typical {p.typicalOpen}–{p.typicalClose}</span>
         </div>
         <p className="why"><b>Why:</b> {whySentence(r, mode, weather)}</p>
 
         {open && (
           <>
-            {p.note && <p style={{ fontSize: 13.5, marginTop: 10 }}>{p.note}</p>}
+            {p.note && <p className="note-text">{p.note}</p>}
             <div className="facts">
               <Fact label="Changing table" value={p.facilities.changing} />
               <Fact label="Stroller" value={p.facilities.stroller} />
@@ -283,9 +434,9 @@ function PlaceCard({ r, rank, mode, weather, food, open, onToggle, onSpeak }) {
             </div>
             {nearbyFood.length > 0 && (
               <>
-                <p className="label" style={{ marginTop: 16 }}>Then what?</p>
+                <p className="label">Then what?</p>
                 {nearbyFood.map(({ f, km }) => (
-                  <p key={f.id} style={{ fontSize: 13.5, margin: "4px 0 0" }}>
+                  <p key={f.id} className="food">
                     <b>{f.name}</b> · {Math.round(km * 13)} min walk
                     {f.facilities?.highchair === "yes" ? " · high chair" : ""}
                     {f.facilities?.changing === "yes" ? " · changing table" : ""}
