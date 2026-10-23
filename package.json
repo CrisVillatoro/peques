@@ -1,0 +1,17 @@
+{
+  "name": "berlin-family-scout",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "fix-coordinates": "node scripts/fix-coordinates.mjs",
+    "import-food": "node scripts/import-food.mjs"
+  },
+  "dependencies": {
+    "next": "15.5.4",
+    "react": "19.1.1",
+    "react-dom": "19.1.1"
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "_note": "Kid-friendly places to eat. Empty on purpose: run `npm run import-food` on your Mac to fill it from OpenStreetMap (cafés and restaurants tagged with a changing table, high chair or kids' area). You can also add your own favourites by hand.",
+  "_fields": "id, name, where, lat, lon, facilities {changing, highchair, playArea}, source",
+  "places": []
+}
