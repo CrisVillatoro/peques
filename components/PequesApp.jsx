@@ -460,6 +460,7 @@ function PlaceCard({ r, rank, mode, weather, food, open, onToggle }) {
         <div className="cname">{p.name}</div>
         <div className="cwhere">{p.where} · {p.priceHint}</div>
         <div className="meta">
+          {p.kindLabel && <span className="m kind">{p.kindLabel}</span>}
           <span className={`m ${p.setting}`}>{p.setting === "indoor" ? "Indoor" : p.setting === "outdoor" ? "Outdoor" : "Mixed"}</span>
           <span className="m">{r.travel.minutes} min {r.travel.mode === "walk" ? "walk" : "by transit"}</span>
           <span className="m">{r.km.toFixed(1)} km</span>

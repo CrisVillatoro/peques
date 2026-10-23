@@ -27,7 +27,7 @@ const AREA = "";
 const GROUPS = [
   {
     id: "playground",
-    label: "Playground",
+    label: "Spielplatz",
     query: `nwr["leisure"="playground"](${BBOX});`,
     setting: "outdoor", covered: 0,
     fit: { b: 2, t: 5, p: 5, s: 4 },
@@ -36,7 +36,7 @@ const GROUPS = [
   },
   {
     id: "indoor-play",
-    label: "Indoor playground",
+    label: "Indoor-Spielplatz",
     query: `nwr["leisure"="indoor_play"](${BBOX});
             nwr["leisure"="playground"]["indoor"="yes"](${BBOX});
             nwr["amenity"="indoor_play"](${BBOX});`,
@@ -47,7 +47,7 @@ const GROUPS = [
   },
   {
     id: "farm",
-    label: "City farm",
+    label: "Kinderbauernhof",
     query: `nwr["name"~"Kinderbauernhof|Jugendfarm|Kinderfarm|Tierhof|Streichelzoo",i](${BBOX});
             nwr["tourism"="farm"]["name"](${BBOX});`,
     setting: "outdoor", covered: 0.2,
@@ -57,7 +57,7 @@ const GROUPS = [
   },
   {
     id: "zoo",
-    label: "Zoo / animal park",
+    label: "Zoo / Tierpark",
     query: `nwr["tourism"="zoo"](${BBOX});
             nwr["tourism"="aquarium"](${BBOX});`,
     setting: "mixed", covered: 0.4,
@@ -67,7 +67,7 @@ const GROUPS = [
   },
   {
     id: "library",
-    label: "Library",
+    label: "Bibliothek",
     query: `nwr["amenity"="library"](${BBOX});`,
     setting: "indoor", covered: 1,
     fit: { b: 4, t: 4, p: 5, s: 5 },
@@ -85,7 +85,7 @@ const GROUPS = [
   },
   {
     id: "pool",
-    label: "Swimming",
+    label: "Schwimmbad",
     query: `nwr["leisure"="water_park"](${BBOX});
             nwr["amenity"="public_bath"](${BBOX});
             nwr["leisure"="swimming_pool"]["access"!="private"](${BBOX});
@@ -97,7 +97,7 @@ const GROUPS = [
   },
   {
     id: "lake",
-    label: "Lake / beach",
+    label: "See / Strandbad",
     query: `nwr["leisure"="beach_resort"](${BBOX});
             nwr["natural"="beach"](${BBOX});`,
     setting: "outdoor", covered: 0,
@@ -107,7 +107,7 @@ const GROUPS = [
   },
   {
     id: "park",
-    label: "Park / garden",
+    label: "Park / Garten",
     query: `nwr["leisure"="park"]["name"](${BBOX});
             nwr["leisure"="garden"]["garden:type"="botanical"](${BBOX});`,
     setting: "outdoor", covered: 0,
@@ -117,7 +117,7 @@ const GROUPS = [
   },
   {
     id: "theatre",
-    label: "Children's theatre",
+    label: "Kindertheater",
     query: `nwr["amenity"="theatre"]["theatre:genre"~"children|puppet",i](${BBOX});
             nwr["amenity"="theatre"]["name"~"Kinder|Puppen|Figuren",i](${BBOX});`,
     setting: "indoor", covered: 1,
@@ -127,7 +127,7 @@ const GROUPS = [
   },
   {
     id: "family-centre",
-    label: "Family centre",
+    label: "Familienzentrum",
     query: `nwr["amenity"="community_centre"]["name"~"Familienzentrum|Kinder|Eltern|Nachbarschaftshaus",i](${BBOX});
             nwr["social_facility"="outreach"]["name"~"Familien|Kinder",i](${BBOX});`,
     setting: "indoor", covered: 1,
@@ -222,7 +222,7 @@ function toPlace(el, group) {
 
   // a playground without a name is still useful; a museum without one is noise
   const unnamedOk = group.id === "playground";
-  const name = t.name || (unnamedOk ? "Playground" : null);
+  const name = t.name || (unnamedOk ? "Spielplatz" : null);
   if (!name) return null;
 
   const kids = /kinder|kids|family|familien|baby|krabbel/i.test(`${t.name || ""} ${t.description || ""}`);

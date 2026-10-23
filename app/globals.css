@@ -239,6 +239,7 @@ button.tag { cursor: pointer; }
 .m.outdoor { background: #e3f5dd; }
 .m.mixed { background: #e4f2fc; }
 .m.fit { background: #fff3d1; }
+.m.kind { background: var(--ink); color: #fff; }
 .why { margin-top: 12px; font-size: 13.5px; border-left: 3px solid var(--sun); padding-left: 10px; }
 .note-text { font-size: 13.5px; margin-top: 10px; color: var(--muted); }
 .facts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 12px; }

@@ -88,7 +88,7 @@ function toPlace(f) {
 
   // The service names fields in German and the exact set varies by release,
   // so try the usual spellings and fall back gracefully.
-  const name = pick(p, ["nam", "name", "bezeichnung", "anlagenname", "spielplatzname", "gruenanlage"]) || "Playground";
+  const name = pick(p, ["nam", "name", "bezeichnung", "anlagenname", "spielplatzname", "gruenanlage"]) || "Spielplatz";
   const district = pick(p, ["bezirk", "bez_name", "ortsteil", "bezirksname"]) || "Berlin";
   const id = pick(p, ["gml_id", "id", "objektid", "spielplatznummer"]) || `${point.lat},${point.lon}`;
   const ageText = String(pick(p, ["altersgruppe", "alter", "zielgruppe"]) || "");
@@ -105,7 +105,7 @@ function toPlace(f) {
     lat: point.lat,
     lon: point.lon,
     kind: "playground",
-    kindLabel: "Playground",
+    kindLabel: "Spielplatz",
     setting: "outdoor",
     covered: 0,
     free: true,
