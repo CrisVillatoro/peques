@@ -14,6 +14,7 @@ import {
   slotsFor,
 } from "../lib/when";
 import Art from "./Art";
+import ResultsMap from "./ResultsMap";
 
 const BERLIN = { lat: 52.5234, lon: 13.4113, label: "Berlin (centre)" };
 const KIDS_KEY = "peques.kids.v1";
@@ -59,6 +60,7 @@ export default function PequesApp({ places, food }) {
   const [weather, setWeather] = useState(null);
   const [weatherError, setWeatherError] = useState(null);
   const [phase, setPhase] = useState("home"); // home | searching | results
+  const [view, setView] = useState("list"); // list | map
   const [openId, setOpenId] = useState(null);
 
   const days = useMemo(() => dayOptions(new Date()), []);
@@ -148,25 +150,16 @@ export default function PequesApp({ places, food }) {
   };
 
   const ranking = useMemo(
-    () => rankPlaces({ places, origin, kids: withAges, choice, weather, now: when, maxKm }),
+    () => rankPlaces({ places, origin, kids: withAges, choice, weather, now: when, maxKm, limit: 12 }),
     [places, origin, withAges, choice, weather, when, maxKm]
   );
+  const picks = useMemo(() => ranking.results.slice(0, 3), [ranking]);
+  const runnersUp = useMemo(() => ranking.results.slice(3), [ranking]);
 
   const find = () => {
     setPhase("searching");
     setOpenId(null);
     setTimeout(() => setPhase("results"), 600);
-  };
-
-  const speak = (r) => {
-    const p = r.place;
-    const text = `Top pick for ${whenLabel}: ${p.name}, ${p.where}. ${whySentence(r, ranking.mode, weather)} Typically open until ${p.typicalClose}.`;
-    try {
-      window.speechSynthesis?.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.lang = "en-GB";
-      window.speechSynthesis?.speak(u);
-    } catch (e) { /* ignore */ }
   };
 
   const wx = weather
@@ -355,11 +348,30 @@ export default function PequesApp({ places, food }) {
 
         {phase === "results" && (
           <>
-            <p className="rlabel">
-              {ranking.results.length ? "Your pick for" : "Nothing open"} {whenLabel}
-              <span>from {origin.label}{maxKm ? ` · within ${maxKm} km` : " · all Berlin"}</span>
-            </p>
-            {ranking.results.map((r, i) => (
+            <div className="rhead">
+              <p className="rlabel">
+                {picks.length ? "Your pick for" : "Nothing open"} {whenLabel}
+                <span>from {origin.label}{maxKm ? ` · within ${maxKm} km` : " · all Berlin"}</span>
+              </p>
+              {picks.length > 0 && (
+                <div className="viewtoggle" role="group" aria-label="List or map">
+                  <button type="button" aria-pressed={view === "list"} onClick={() => setView("list")}>List</button>
+                  <button type="button" aria-pressed={view === "map"} onClick={() => setView("map")}>Map</button>
+                </div>
+              )}
+            </div>
+
+            {view === "map" && picks.length > 0 && (
+              <ResultsMap
+                origin={origin}
+                maxKm={maxKm}
+                results={picks}
+                others={runnersUp}
+                onPick={(id) => { setOpenId(id); setView("list"); }}
+              />
+            )}
+
+            {view === "list" && picks.map((r, i) => (
               <PlaceCard
                 key={r.place.id}
                 r={r}
@@ -367,12 +379,12 @@ export default function PequesApp({ places, food }) {
                 mode={ranking.mode}
                 weather={weather}
                 food={food}
-                open={openId === r.place.id || i === 0}
+                open={openId === r.place.id || (i === 0 && !openId)}
                 onToggle={() => setOpenId(openId === r.place.id ? null : r.place.id)}
-                onSpeak={() => speak(r)}
               />
             ))}
-            {!ranking.results.length && (
+
+            {!picks.length && (
               <p className="notice">
                 Nothing matches {whenLabel} within {maxKm ? `${maxKm} km` : "Berlin"}. Try a wider radius, another time of
                 day, or &ldquo;Weather decides&rdquo;.
@@ -393,7 +405,7 @@ export default function PequesApp({ places, food }) {
   );
 }
 
-function PlaceCard({ r, rank, mode, weather, food, open, onToggle, onSpeak }) {
+function PlaceCard({ r, rank, mode, weather, food, open, onToggle }) {
   const p = r.place;
   const nearbyFood = useMemo(() => {
     if (!food?.length) return [];
@@ -409,7 +421,6 @@ function PlaceCard({ r, rank, mode, weather, food, open, onToggle, onSpeak }) {
       <div className="art">
         <Art kind={p.tags?.[0] || p.setting} />
         {rank === 0 && <span className="rank">Top pick</span>}
-        <button className="speak" type="button" onClick={onSpeak} aria-label="Read this pick aloud">🔊</button>
       </div>
       <div className="cbody">
         <div className="cname">{p.name}</div>
