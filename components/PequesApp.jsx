@@ -14,12 +14,14 @@ import {
   resolveWhen,
   slotsFor,
 } from "../lib/when";
+import { detectLang, LANGS, translator } from "../lib/i18n";
 import Art from "./Art";
 import ResultsMap from "./ResultsMap";
 
 const BERLIN = { lat: 52.5234, lon: 13.4113, label: "Berlin (centre)" };
 const KIDS_KEY = "peques.kids.v1";
 const PLACE_KEY = "peques.origin.v1";
+const LANG_KEY = "peques.lang.v1";
 
 const DEFAULT_KIDS = [
   { id: "k1", name: "Little one", birth: isoMonthsAgo(28), coming: true, colour: "#FFC845" },
@@ -46,6 +48,7 @@ function ageLabel(months) {
 }
 
 export default function PequesApp({ places: seedPlaces, food }) {
+  const [lang, setLang] = useState("de");
   const [imported, setImported] = useState([]);
   const [library, setLibrary] = useState("loading"); // loading | ready | seed-only
   const [kids, setKids] = useState(DEFAULT_KIDS);
@@ -66,10 +69,24 @@ export default function PequesApp({ places: seedPlaces, food }) {
   const [view, setView] = useState("list"); // list | map
   const [openId, setOpenId] = useState(null);
 
-  const days = useMemo(() => dayOptions(new Date()), []);
+  const t = useMemo(() => translator(lang), [lang]);
+
+  // language: what the browser prefers, unless this browser chose before
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(LANG_KEY);
+      setLang(saved || detectLang());
+    } catch (e) { setLang(detectLang()); }
+  }, []);
+  useEffect(() => {
+    try { localStorage.setItem(LANG_KEY, lang); } catch (e) { /* ignore */ }
+    if (typeof document !== "undefined") document.documentElement.lang = lang;
+  }, [lang]);
+
+  const days = useMemo(() => dayOptions(new Date(), lang), [lang]);
   const slots = useMemo(() => slotsFor(dateIso, new Date()), [dateIso]);
   const when = useMemo(() => resolveWhen(dateIso, slotKey, new Date()), [dateIso, slotKey]);
-  const whenLabel = describeWhen(when, dateIso, slotKey, new Date());
+  const whenLabel = describeWhen(when, dateIso, slotKey, new Date(), t, lang);
   const tooFarForWeather = daysAhead(dateIso, new Date()) >= FORECAST_DAYS;
 
   useEffect(() => {
@@ -125,8 +142,8 @@ export default function PequesApp({ places: seedPlaces, food }) {
       setWeather(null);
       setWeatherError(
         daysAhead(isoDate(at)) >= FORECAST_DAYS
-          ? `No forecast that far ahead (about ${FORECAST_DAYS} days)`
-          : "No weather for that time"
+          ? t("weather.tooFar", { days: FORECAST_DAYS })
+          : t("weather.noTime")
       );
     }
   }, []);
@@ -156,9 +173,9 @@ export default function PequesApp({ places: seedPlaces, food }) {
     try {
       const found = await searchPlaces(query);
       setHits(found);
-      if (!found.length) setSearchError("Nothing found in Berlin for that.");
+      if (!found.length) setSearchError(t("where.nothing"));
     } catch (err) {
-      setSearchError("Search is unavailable right now — try a district below.");
+      setSearchError(t("where.unavailable"));
     } finally {
       setSearching(false);
     }
@@ -190,21 +207,28 @@ export default function PequesApp({ places: seedPlaces, food }) {
         icon: weather.rainMm >= 0.2 || weather.rainy ? "🌧" : weather.tempC >= 28 ? "🥵" : weather.tempC <= 3 ? "❄️" : "☀️",
         text: `${Math.round(weather.tempC)}° · ${weather.condition}`,
       }
-    : { cls: "", icon: "·", text: weatherError || "checking weather…" };
+    : { cls: "", icon: "·", text: weatherError || t("weather.checking") };
 
   return (
     <div className="shell">
       <header className="masthead">
         <span className="wordmark"><i aria-hidden="true" />Peques</span>
-        <span className="tagline">Good things to do with the little ones, in Berlin</span>
+        <span className="tagline">{t("tagline")}</span>
+        <div className="langs" role="group" aria-label="Sprache / Language">
+          {LANGS.map((l) => (
+            <button key={l.code} type="button" aria-pressed={lang === l.code} onClick={() => setLang(l.code)}>
+              {l.label}
+            </button>
+          ))}
+        </div>
       </header>
 
       <section className="panel">
-        <h1 className="hello">{greeting()}<br /><em>What shall we do?</em></h1>
+        <h1 className="hello">{t(greetingKey())}<br /><em>{t("greeting.question")}</em></h1>
 
         <div className="ctx">
           <button className="tag" type="button" onClick={() => setShowWhere((v) => !v)} aria-expanded={showWhere}>
-            📍 {locating ? "finding you…" : origin.label} <span className="change">change</span>
+            📍 {locating ? t("where.locating") : localLabel(origin, t)} <span className="change">{t("where.change")}</span>
           </button>
           <span className={`tag ${wx.cls}`}>{wx.icon} {wx.text}</span>
         </div>
@@ -215,13 +239,13 @@ export default function PequesApp({ places: seedPlaces, food }) {
               <input
                 id="place-search"
                 type="search"
-                placeholder="Street, Kiez or place in Berlin"
+                placeholder={t("where.search")}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 autoComplete="off"
               />
               <button type="submit" disabled={searching || query.trim().length < 3}>
-                {searching ? "…" : "Search"}
+                {searching ? "…" : t("where.searchButton")}
               </button>
             </form>
             {searchError && <p className="hint">{searchError}</p>}
@@ -238,7 +262,7 @@ export default function PequesApp({ places: seedPlaces, food }) {
               </ul>
             )}
             <div className="chips">
-              <button type="button" className="chip" onClick={locate}>📍 Use my location</button>
+              <button type="button" className="chip" onClick={locate}>{t("where.useLocation")}</button>
               {QUICK_PLACES.map((p) => (
                 <button
                   key={p.name}
@@ -254,7 +278,7 @@ export default function PequesApp({ places: seedPlaces, food }) {
           </div>
         )}
 
-        <p className="label">How far?</p>
+        <p className="label">{t("far.label")}</p>
         <div className="chips" role="group" aria-label="Search radius">
           {RADIUS_OPTIONS.map((r) => (
             <button
@@ -264,16 +288,16 @@ export default function PequesApp({ places: seedPlaces, food }) {
               aria-pressed={maxKm === r.km}
               onClick={() => setMaxKm(r.km)}
             >
-              {r.label}
+              {r.km ? r.label : t("far.all")}
             </button>
           ))}
         </div>
 
-        <p className="label">When?</p>
+        <p className="label">{t("when.label")}</p>
         <div className="chips" role="group" aria-label="Which day">
           {days.map((d) => (
             <button key={d.key} type="button" className="chip" aria-pressed={dateIso === d.date} onClick={() => setDateIso(d.date)}>
-              {d.label}
+              {d.label || t(`when.${d.key}`)}
             </button>
           ))}
           <label className="chip date" htmlFor="pick-date">
@@ -281,7 +305,7 @@ export default function PequesApp({ places: seedPlaces, food }) {
             <input
               id="pick-date"
               type="date"
-              aria-label="Pick another date"
+              aria-label={t("when.pickDate")}
               value={dateIso}
               min={isoDate(new Date())}
               onChange={(e) => e.target.value && setDateIso(e.target.value)}
@@ -291,15 +315,15 @@ export default function PequesApp({ places: seedPlaces, food }) {
         <div className="chips" role="group" aria-label="Time of day">
           {slots.map((s) => (
             <button key={s.key} type="button" className="chip small" aria-pressed={slotKey === s.key} onClick={() => setSlotKey(s.key)}>
-              {s.label}
+              {t(`when.${s.key}`)}
             </button>
           ))}
         </div>
         {tooFarForWeather && (
-          <p className="hint">More than {FORECAST_DAYS} days ahead, so there is no forecast yet — results ignore the weather.</p>
+          <p className="hint">{t("when.noForecast", { days: FORECAST_DAYS })}</p>
         )}
 
-        <p className="label">Who&apos;s coming?</p>
+        <p className="label">{t("kids.label")}</p>
         <div className="kids">
           {withAges.map((k) => (
             <button
@@ -310,16 +334,16 @@ export default function PequesApp({ places: seedPlaces, food }) {
               onClick={() => setKids((all) => all.map((x) => (x.id === k.id ? { ...x, coming: !x.coming } : x)))}
             >
               <span className="face" style={{ background: k.colour }}>{ageLabel(k.months)}</span>
-              {k.name}
+              {k.name === "Little one" ? t("kids.little") : k.name === "Friend" ? t("kids.friend") : k.name}
             </button>
           ))}
           <button
             type="button"
             className="kid add"
             onClick={() => {
-              const birth = window.prompt("Birth month of the child (YYYY-MM). No names needed.", isoMonthsAgo(12));
+              const birth = window.prompt(t("kids.promptBirth"), isoMonthsAgo(12));
               if (!birth || !/^\d{4}-\d{2}$/.test(birth)) return;
-              const name = window.prompt("A short label for them (optional)", "Child") || "Child";
+              const name = window.prompt(t("kids.promptName"), t("kids.defaultName")) || t("kids.defaultName");
               setKids((all) => [
                 ...all,
                 { id: `k${Date.now()}`, name, birth, coming: true, colour: ["#9ED98B", "#B9A6F5", "#F2668B"][all.length % 3] },
@@ -327,35 +351,35 @@ export default function PequesApp({ places: seedPlaces, food }) {
             }}
           >
             <span className="face">+</span>
-            Add
+            {t("kids.add")}
           </button>
         </div>
 
-        <p className="label">Inside or outside?</p>
-        <div className="seg" role="radiogroup" aria-label="Indoor or outdoor">
-          {[["indoor", "Indoor"], ["auto", "Weather decides"], ["outdoor", "Outdoor"]].map(([value, label]) => (
+        <p className="label">{t("setting.label")}</p>
+        <div className="seg" role="radiogroup" aria-label={t("setting.label")}>
+          {["indoor", "auto", "outdoor"].map((value) => (
             <button key={value} type="button" role="radio" data-mode={value} aria-checked={choice === value} onClick={() => setChoice(value)}>
-              {label}
+              {t(`setting.${value}`)}
             </button>
           ))}
         </div>
         <p className="hint" aria-live="polite">
           {choice === "auto"
-            ? weatherSentence(weather, ranking.mode)
+            ? weatherSentence(weather, ranking.mode, t)
             : choice === "indoor"
-            ? "Only indoor places."
+            ? t("setting.onlyIndoor")
             : weather && (weather.rainMm >= 0.2 || weather.rainy)
-            ? "Outdoor it is — I will show a covered option too."
-            : "Outdoor places first."}
+            ? t("setting.outdoorRain")
+            : t("setting.outdoorFirst")}
         </p>
 
         <button className="find" type="button" onClick={find} disabled={phase === "searching"}>
           <span>
-            Find something
+            {t("find.button")}
             <small>
               {library === "loading"
-                ? "loading places…"
-                : `${ranking.total} place${ranking.total === 1 ? "" : "s"} open ${whenLabel}`}
+                ? t("find.loading")
+                : t(ranking.total === 1 ? "find.subOne" : "find.sub", { count: ranking.total, when: whenLabel })}
             </small>
           </span>
           <span className="go" aria-hidden="true">→</span>
@@ -366,7 +390,7 @@ export default function PequesApp({ places: seedPlaces, food }) {
         {phase === "home" && (
           <div className="placeholder">
             <div className="placeholder-art"><Art kind="park" /></div>
-            <p>Pick where you are, when you&apos;re going, and who&apos;s coming — then tap <b>Find something</b>.</p>
+            <p>{t("results.placeholder", { button: t("find.button") })}</p>
           </div>
         )}
 
@@ -376,13 +400,18 @@ export default function PequesApp({ places: seedPlaces, food }) {
           <>
             <div className="rhead">
               <p className="rlabel">
-                {picks.length ? "Your pick for" : "Nothing open"} {whenLabel}
-                <span>from {origin.label}{maxKm ? ` · within ${maxKm} km` : " · all Berlin"}</span>
+                {t(picks.length ? "results.pick" : "results.none", { when: whenLabel })}
+                <span>
+                  {t("results.from", {
+                    place: localLabel(origin, t),
+                    radius: maxKm ? t("results.radius", { km: maxKm }) : t("results.allBerlin"),
+                  })}
+                </span>
               </p>
               {picks.length > 0 && (
-                <div className="viewtoggle" role="group" aria-label="List or map">
-                  <button type="button" aria-pressed={view === "list"} onClick={() => setView("list")}>List</button>
-                  <button type="button" aria-pressed={view === "map"} onClick={() => setView("map")}>Map</button>
+                <div className="viewtoggle" role="group" aria-label={`${t("results.list")} / ${t("results.map")}`}>
+                  <button type="button" aria-pressed={view === "list"} onClick={() => setView("list")}>{t("results.list")}</button>
+                  <button type="button" aria-pressed={view === "map"} onClick={() => setView("map")}>{t("results.map")}</button>
                 </div>
               )}
             </div>
@@ -407,13 +436,13 @@ export default function PequesApp({ places: seedPlaces, food }) {
                 food={food}
                 open={openId === r.place.id || (i === 0 && !openId)}
                 onToggle={() => setOpenId(openId === r.place.id ? null : r.place.id)}
+                t={t}
               />
             ))}
 
             {!picks.length && (
               <p className="notice">
-                Nothing matches {whenLabel} within {maxKm ? `${maxKm} km` : "Berlin"}. Try a wider radius, another time of
-                day, or &ldquo;Weather decides&rdquo;.
+                {t("results.empty", { when: whenLabel, radius: maxKm ? `${maxKm} km` : "Berlin" })}
               </p>
             )}
           </>
@@ -422,24 +451,23 @@ export default function PequesApp({ places: seedPlaces, food }) {
 
       <footer className="footer">
         {library === "ready" && (
-          <>Searching {counts.total.toLocaleString("en-GB")} places: {counts.curated} written by hand,{" "}
-          {counts.osm.toLocaleString("en-GB")} imported from OpenStreetMap. · </>
+          <>{t("footer.searching", {
+            total: counts.total.toLocaleString(lang === "de" ? "de-DE" : "en-GB"),
+            curated: counts.curated,
+            osm: counts.osm.toLocaleString(lang === "de" ? "de-DE" : "en-GB"),
+          })} · </>
         )}
         {library === "seed-only" && (
-          <>Only the {counts.curated} hand-written places are loaded — run <code>npm run import-places</code> to add the
-          rest. · </>
+          <>{t("footer.seedOnly", { curated: counts.curated, command: "npm run import-places" })} · </>
         )}
-        Peques v0.1 · Places are a hand-written starter list: opening hours are typical values, always check the
-        venue&apos;s own page. Weather from <a href="https://open-meteo.com/">Open-Meteo</a> (DWD ICON model). Address
-        search and imported places come from <a href="https://www.openstreetmap.org/copyright">OpenStreetMap
-        contributors</a>. Your children&apos;s birth months and your last location stay in this browser; nothing is sent
-        to a server.
+        {t("footer.about", { weather: "Open-Meteo (DWD ICON)", osm: "OpenStreetMap" })}{" "}
+        <a href="https://open-meteo.com/">Open-Meteo</a> · <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>
       </footer>
     </div>
   );
 }
 
-function PlaceCard({ r, rank, mode, weather, food, open, onToggle }) {
+function PlaceCard({ r, rank, mode, weather, food, open, onToggle, t }) {
   const p = r.place;
   const nearbyFood = useMemo(() => {
     if (!food?.length) return [];
@@ -454,38 +482,38 @@ function PlaceCard({ r, rank, mode, weather, food, open, onToggle }) {
     <article className={`card ${rank === 0 ? "top" : "small"}`}>
       <div className="art">
         <Art kind={p.tags?.[0] || p.setting} />
-        {rank === 0 && <span className="rank">Top pick</span>}
+        {rank === 0 && <span className="rank">{t("results.top")}</span>}
       </div>
       <div className="cbody">
         <div className="cname">{p.name}</div>
         <div className="cwhere">{p.where} · {p.priceHint}</div>
         <div className="meta">
           {p.kindLabel && <span className="m kind">{p.kindLabel}</span>}
-          <span className={`m ${p.setting}`}>{p.setting === "indoor" ? "Indoor" : p.setting === "outdoor" ? "Outdoor" : "Mixed"}</span>
-          <span className="m">{r.travel.minutes} min {r.travel.mode === "walk" ? "walk" : "by transit"}</span>
+          <span className={`m ${p.setting}`}>{t(`card.${p.setting}`)}</span>
+          <span className="m">{r.travel.minutes} {t(r.travel.mode === "walk" ? "card.walk" : "card.transit")}</span>
           <span className="m">{r.km.toFixed(1)} km</span>
-          <span className="m fit">{r.fit >= 4.5 ? "Great fit" : r.fit >= 3.5 ? "Good fit" : "OK fit"}</span>
-          <span className="m">typical {p.typicalOpen}–{p.typicalClose}</span>
+          <span className="m fit">{t(r.fit >= 4.5 ? "card.fitGreat" : r.fit >= 3.5 ? "card.fitGood" : "card.fitOk")}</span>
+          <span className="m">{t("card.typical")} {p.typicalOpen}–{p.typicalClose}</span>
         </div>
-        <p className="why"><b>Why:</b> {whySentence(r, mode, weather)}</p>
+        <p className="why"><b>{t("card.why")}</b> {whySentence(r, mode, weather, t)}</p>
 
         {open && (
           <>
             {p.note && <p className="note-text">{p.note}</p>}
             <div className="facts">
-              <Fact label="Changing table" value={p.facilities.changing} />
-              <Fact label="Stroller" value={p.facilities.stroller} />
-              <Fact label="High chair" value={p.facilities.highchair} />
-              <Fact label="Play area" value={p.facilities.playArea} />
+              <Fact label={t("card.changing")} value={p.facilities.changing} t={t} />
+              <Fact label={t("card.stroller")} value={p.facilities.stroller} t={t} />
+              <Fact label={t("card.highchair")} value={p.facilities.highchair} t={t} />
+              <Fact label={t("card.playArea")} value={p.facilities.playArea} t={t} />
             </div>
             {nearbyFood.length > 0 && (
               <>
-                <p className="label">Then what?</p>
+                <p className="label">{t("card.thenWhat")}</p>
                 {nearbyFood.map(({ f, km }) => (
                   <p key={f.id} className="food">
-                    <b>{f.name}</b> · {Math.round(km * 13)} min walk
-                    {f.facilities?.highchair === "yes" ? " · high chair" : ""}
-                    {f.facilities?.changing === "yes" ? " · changing table" : ""}
+                    <b>{f.name}</b> · {Math.round(km * 13)} {t("card.minWalk")}
+                    {f.facilities?.highchair === "yes" ? t("card.withHighchair") : ""}
+                    {f.facilities?.changing === "yes" ? t("card.withChanging") : ""}
                   </p>
                 ))}
               </>
@@ -497,15 +525,15 @@ function PlaceCard({ r, rank, mode, weather, food, open, onToggle }) {
                 target="_blank"
                 rel="noreferrer"
               >
-                Directions
+                {t("card.directions")}
               </a>
-              {p.url && <a href={p.url} target="_blank" rel="noreferrer">Opening hours</a>}
+              {p.url && <a href={p.url} target="_blank" rel="noreferrer">{t("card.hours")}</a>}
             </div>
           </>
         )}
         {rank > 0 && (
           <div className="actions">
-            <button type="button" onClick={onToggle}>{open ? "Less" : "More"}</button>
+            <button type="button" onClick={onToggle}>{t(open ? "card.less" : "card.more")}</button>
           </div>
         )}
       </div>
@@ -513,19 +541,26 @@ function PlaceCard({ r, rank, mode, weather, food, open, onToggle }) {
   );
 }
 
-function Fact({ label, value }) {
-  const text = value === "yes" ? "yes" : value === "no" ? "no" : "unknown";
+function Fact({ label, value, t }) {
+  const known = value === "yes" ? "yes" : value === "no" ? "no" : "unknown";
   return (
     <div className="fact">
-      <b className={text === "unknown" ? "unknown" : undefined}>{text}</b>
+      <b className={known === "unknown" ? "unknown" : undefined}>{t(`card.${known}`)}</b>
       {label}
     </div>
   );
 }
 
-function greeting() {
+function greetingKey() {
   const h = new Date().getHours();
-  if (h < 11) return "Good morning.";
-  if (h < 18) return "Good afternoon.";
-  return "Good evening.";
+  if (h < 11) return "greeting.morning";
+  if (h < 18) return "greeting.afternoon";
+  return "greeting.evening";
+}
+
+/** The two built-in place labels are translated; a searched address is not. */
+function localLabel(origin, t) {
+  if (origin.label === "Where I am") return t("where.near");
+  if (origin.label === "Berlin (centre)") return t("where.berlin");
+  return origin.label;
 }

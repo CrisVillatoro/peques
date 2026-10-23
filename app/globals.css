@@ -45,7 +45,13 @@ input, select { font: inherit; color: inherit; }
   display: grid;
   gap: 4px;
 }
-.masthead { display: none; }
+.masthead { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding-bottom: 10px; }
+.masthead .wordmark { font: 800 19px var(--display); letter-spacing: -0.02em; display: flex; align-items: center; gap: 8px; }
+.masthead .wordmark i { width: 13px; height: 13px; border-radius: 50%; background: var(--green); box-shadow: 8px 0 0 -2px var(--sun); }
+.masthead .tagline { display: none; }
+.langs { display: flex; gap: 2px; background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
+.langs button { border: 0; background: none; border-radius: 999px; padding: 5px 11px; font: 600 12px var(--mono); color: var(--muted); cursor: pointer; }
+.langs button[aria-pressed="true"] { background: var(--ink); color: #fff; }
 
 /* laptop and up: controls on the left, results on the right */
 @media (min-width: 900px) {
@@ -73,6 +79,9 @@ input, select { font: inherit; color: inherit; }
   .wordmark { font: 800 24px var(--display); letter-spacing: -0.02em; display: flex; align-items: center; gap: 9px; }
   .wordmark i { width: 15px; height: 15px; border-radius: 50%; background: var(--green); box-shadow: 9px 0 0 -2px var(--sun); }
   .tagline { color: var(--muted); font-size: 14.5px; }
+  .langs { margin-left: auto; display: flex; gap: 2px; background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
+  .langs button { border: 0; background: none; border-radius: 999px; padding: 5px 11px; font: 600 12px var(--mono); color: var(--muted); cursor: pointer; }
+  .langs button[aria-pressed="true"] { background: var(--ink); color: #fff; }
   .panel {
     grid-area: panel;
     position: sticky;
