@@ -70,7 +70,6 @@ export default function PequesApp({ places: seedPlaces, food }) {
   const [view, setView] = useState("list"); // list | map
   const [kindFilter, setKindFilter] = useState(null); // null = every category
   const [shown, setShown] = useState(12);
-  const [pinned, setPinned] = useState(null); // a place you opened from the list
   const [openId, setOpenId] = useState(null);
 
   const t = useMemo(() => translator(lang), [lang]);
@@ -469,13 +468,6 @@ export default function PequesApp({ places: seedPlaces, food }) {
               />
             )}
 
-            {view === "list" && pinned && (
-              <div className="pinned">
-                <button type="button" className="closepin" onClick={() => setPinned(null)} aria-label="×">×</button>
-                <PlaceCard r={pinned} rank={0} mode={ranking.mode} weather={weather} food={food} open onToggle={() => {}} t={t} />
-              </div>
-            )}
-
             {view === "list" && picks.map((r, i) => (
               <PlaceCard
                 key={r.place.id}
@@ -497,16 +489,36 @@ export default function PequesApp({ places: seedPlaces, food }) {
                   <span>{t("browse.showing", { shown: Math.min(shown, rest.length) + picks.length, total: ranking.total })}</span>
                 </p>
                 <ul className="browse">
-                  {rest.slice(0, shown).map((r) => (
-                    <li key={r.place.id}>
-                      <button type="button" onClick={() => { setOpenId(r.place.id); setPinned(r); }}>
-                        <span className="b-name">{r.place.name}</span>
-                        <span className="b-meta">
-                          {labelFor(r.place)} · {r.place.where} · {r.travel.minutes} {t(r.travel.mode === "walk" ? "card.walk" : "card.transit")} · {r.km.toFixed(1)} km
-                        </span>
-                      </button>
-                    </li>
-                  ))}
+                  {rest.slice(0, shown).map((r) => {
+                    const isOpen = openId === r.place.id;
+                    return (
+                      <li key={r.place.id} className={isOpen ? "open" : undefined}>
+                        <button
+                          type="button"
+                          aria-expanded={isOpen}
+                          onClick={() => setOpenId(isOpen ? null : r.place.id)}
+                        >
+                          <span className="b-name">{r.place.name}</span>
+                          <span className="b-meta">
+                            {labelFor(r.place)} · {r.place.where} · {r.travel.minutes} {t(r.travel.mode === "walk" ? "card.walk" : "card.transit")} · {r.km.toFixed(1)} km
+                          </span>
+                          <span className="b-caret" aria-hidden="true">{isOpen ? "–" : "+"}</span>
+                        </button>
+                        {isOpen && (
+                          <PlaceCard
+                            r={r}
+                            rank={1}
+                            mode={ranking.mode}
+                            weather={weather}
+                            food={food}
+                            open
+                            onToggle={() => setOpenId(null)}
+                            t={t}
+                          />
+                        )}
+                      </li>
+                    );
+                  })}
                 </ul>
                 {shown < rest.length && (
                   <button type="button" className="morebtn" onClick={() => setShown((n) => n + 24)}>

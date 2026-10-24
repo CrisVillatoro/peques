@@ -347,8 +347,14 @@ button.tag { cursor: pointer; }
 .browse { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
 .browse button {
   width: 100%; text-align: left; background: var(--card); border: 1px solid var(--line);
-  border-radius: 14px; padding: 10px 14px; cursor: pointer; display: grid; gap: 2px;
+  border-radius: 14px; padding: 10px 14px; cursor: pointer;
+  display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 2px 10px;
 }
+.browse .b-name, .browse .b-meta { grid-column: 1; }
+.b-caret { grid-column: 2; grid-row: 1 / span 2; font: 500 18px var(--mono); color: var(--muted); }
+.browse li.open > button { border-color: var(--ink); border-radius: 14px 14px 0 0; border-bottom: 0; }
+.browse li.open .card { margin-top: 0; border-radius: 0 0 14px 14px; border-color: var(--ink); }
+.browse li.open .card .art { height: 110px; }
 .browse button:hover { border-color: var(--ink); }
 .b-name { font: 700 14.5px var(--body); }
 .b-meta { font-size: 12px; color: var(--muted); }
@@ -358,10 +364,4 @@ button.tag { cursor: pointer; }
 }
 .morebtn:hover { border-color: var(--ink); }
 
-.pinned { position: relative; }
-.closepin {
-  position: absolute; right: 10px; top: 10px; z-index: 2; width: 32px; height: 32px;
-  border-radius: 50%; border: 0; background: #fff; font-size: 20px; line-height: 1; cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-}
-@media (min-width: 1180px) { .results .pinned { grid-column: 1 / -1; } .results .browse, .results .browse-label, .results .morebtn, .results .kinds { grid-column: 1 / -1; } }
+@media (min-width: 1180px) { .results .browse, .results .browse-label, .results .morebtn, .results .kinds { grid-column: 1 / -1; } }
