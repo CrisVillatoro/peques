@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { distanceKm, rankPlaces, weatherSentence, whySentence } from "../lib/rules";
 import { countBySource, mergePlaces } from "../lib/merge";
-import { expand, labelFor } from "../lib/places";
+import { expand, KINDS, labelFor } from "../lib/places";
 import { fetchWeather, FORECAST_DAYS } from "../lib/weather";
 import { QUICK_PLACES, RADIUS_OPTIONS, searchPlaces } from "../lib/geocode";
 import {
@@ -68,6 +68,9 @@ export default function PequesApp({ places: seedPlaces, food }) {
   const [weatherError, setWeatherError] = useState(null);
   const [phase, setPhase] = useState("home"); // home | searching | results
   const [view, setView] = useState("list"); // list | map
+  const [kindFilter, setKindFilter] = useState(null); // null = every category
+  const [shown, setShown] = useState(12);
+  const [pinned, setPinned] = useState(null); // a place you opened from the list
   const [openId, setOpenId] = useState(null);
 
   const t = useMemo(() => translator(lang), [lang]);
@@ -190,15 +193,37 @@ export default function PequesApp({ places: seedPlaces, food }) {
   };
 
   const ranking = useMemo(
-    () => rankPlaces({ places, origin, kids: withAges, choice, weather, now: when, maxKm, limit: 12 }),
+    () =>
+      rankPlaces({
+        places,
+        origin,
+        kids: withAges,
+        choice,
+        weather,
+        now: when,
+        maxKm,
+        limit: 12,
+        kinds: kindFilter ? [kindFilter] : null,
+      }),
+    [places, origin, withAges, choice, weather, when, maxKm, kindFilter]
+  );
+  const unfiltered = useMemo(
+    () => rankPlaces({ places, origin, kids: withAges, choice, weather, now: when, maxKm, limit: 1, browseLimit: 1 }),
     [places, origin, withAges, choice, weather, when, maxKm]
   );
+  const allKinds = unfiltered.byKind;
+
   const picks = useMemo(() => ranking.results.slice(0, 3), [ranking]);
   const runnersUp = useMemo(() => ranking.results.slice(3), [ranking]);
+  const rest = useMemo(() => {
+    const taken = new Set(picks.map((r) => r.place.id));
+    return (ranking.browse || []).filter((r) => !taken.has(r.place.id));
+  }, [ranking, picks]);
 
   const find = () => {
     setPhase("searching");
     setOpenId(null);
+    setShown(12);
     setTimeout(() => setPhase("results"), 600);
   };
 
@@ -417,6 +442,23 @@ export default function PequesApp({ places: seedPlaces, food }) {
               )}
             </div>
 
+            <div className="kinds" role="group" aria-label={t("filter.label")}>
+              <button type="button" className="chip small" aria-pressed={!kindFilter} onClick={() => { setKindFilter(null); setShown(12); }}>
+                {t("filter.all")}
+              </button>
+              {allKinds.map(([kind, count]) => (
+                <button
+                  key={kind}
+                  type="button"
+                  className="chip small"
+                  aria-pressed={kindFilter === kind}
+                  onClick={() => { setKindFilter(kindFilter === kind ? null : kind); setShown(12); }}
+                >
+                  {KINDS[kind]?.label || kind} <span className="count">{count}</span>
+                </button>
+              ))}
+            </div>
+
             {view === "map" && picks.length > 0 && (
               <ResultsMap
                 origin={origin}
@@ -425,6 +467,13 @@ export default function PequesApp({ places: seedPlaces, food }) {
                 others={runnersUp}
                 onPick={(id) => { setOpenId(id); setView("list"); }}
               />
+            )}
+
+            {view === "list" && pinned && (
+              <div className="pinned">
+                <button type="button" className="closepin" onClick={() => setPinned(null)} aria-label="×">×</button>
+                <PlaceCard r={pinned} rank={0} mode={ranking.mode} weather={weather} food={food} open onToggle={() => {}} t={t} />
+              </div>
             )}
 
             {view === "list" && picks.map((r, i) => (
@@ -440,6 +489,32 @@ export default function PequesApp({ places: seedPlaces, food }) {
                 t={t}
               />
             ))}
+
+            {view === "list" && rest.length > 0 && (
+              <>
+                <p className="label browse-label">
+                  {t("browse.title", { count: ranking.total })}
+                  <span>{t("browse.showing", { shown: Math.min(shown, rest.length) + picks.length, total: ranking.total })}</span>
+                </p>
+                <ul className="browse">
+                  {rest.slice(0, shown).map((r) => (
+                    <li key={r.place.id}>
+                      <button type="button" onClick={() => { setOpenId(r.place.id); setPinned(r); }}>
+                        <span className="b-name">{r.place.name}</span>
+                        <span className="b-meta">
+                          {labelFor(r.place)} · {r.place.where} · {r.travel.minutes} {t(r.travel.mode === "walk" ? "card.walk" : "card.transit")} · {r.km.toFixed(1)} km
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+                {shown < rest.length && (
+                  <button type="button" className="morebtn" onClick={() => setShown((n) => n + 24)}>
+                    {t("browse.more", { count: Math.min(24, rest.length - shown) })}
+                  </button>
+                )}
+              </>
+            )}
 
             {!picks.length && (
               <p className="notice">

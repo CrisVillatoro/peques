@@ -336,3 +336,32 @@ button.tag { cursor: pointer; }
 .maplibregl-ctrl-group { border-radius: 12px !important; overflow: hidden; }
 .maplibregl-ctrl-attrib { font-size: 10.5px; }
 
+
+/* ---------- category filters and the browse list ---------- */
+.kinds { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 14px; }
+.kinds .count { font: 600 11px var(--mono); opacity: 0.6; margin-left: 2px; }
+.kinds .chip[aria-pressed="true"] .count { opacity: 0.8; }
+
+.browse-label { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.browse-label span { font: 500 11.5px var(--mono); text-transform: none; letter-spacing: 0; }
+.browse { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+.browse button {
+  width: 100%; text-align: left; background: var(--card); border: 1px solid var(--line);
+  border-radius: 14px; padding: 10px 14px; cursor: pointer; display: grid; gap: 2px;
+}
+.browse button:hover { border-color: var(--ink); }
+.b-name { font: 700 14.5px var(--body); }
+.b-meta { font-size: 12px; color: var(--muted); }
+.morebtn {
+  margin-top: 10px; width: 100%; background: var(--card); border: 1px solid var(--line);
+  border-radius: 14px; padding: 12px; font-weight: 600; cursor: pointer;
+}
+.morebtn:hover { border-color: var(--ink); }
+
+.pinned { position: relative; }
+.closepin {
+  position: absolute; right: 10px; top: 10px; z-index: 2; width: 32px; height: 32px;
+  border-radius: 50%; border: 0; background: #fff; font-size: 20px; line-height: 1; cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+@media (min-width: 1180px) { .results .pinned { grid-column: 1 / -1; } .results .browse, .results .browse-label, .results .morebtn, .results .kinds { grid-column: 1 / -1; } }
