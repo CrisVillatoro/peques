@@ -13,6 +13,7 @@
  * Spielplätze), Datenlizenz Deutschland – Namensnennung. Keep the credit.
  */
 import { writeFile, readFile, mkdir } from "node:fs/promises";
+import { toCompact } from "./lib/compact.mjs";
 
 const OUT = new URL("../public/places-osm.json", import.meta.url);
 const SERVICE = "https://gdi.berlin.de/services/wfs/gruenanlagen";
@@ -69,7 +70,8 @@ await writeFile(
       importedAt: new Date().toISOString().slice(0, 10),
       count: merged.length,
       source: "OpenStreetMap contributors (ODbL) · Geoportal Berlin (dl-de/by-2-0)",
-      places: merged,
+      format: "compact-1",
+      places: merged.map((p) => (p.i ? p : toCompact(p))),
     },
     null,
     0

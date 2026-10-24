@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { distanceKm, rankPlaces, weatherSentence, whySentence } from "../lib/rules";
 import { countBySource, mergePlaces } from "../lib/merge";
+import { expand, labelFor } from "../lib/places";
 import { fetchWeather, FORECAST_DAYS } from "../lib/weather";
 import { QUICK_PLACES, RADIUS_OPTIONS, searchPlaces } from "../lib/geocode";
 import {
@@ -123,7 +124,7 @@ export default function PequesApp({ places: seedPlaces, food }) {
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error("not found"))))
       .then((d) => {
         if (cancelled) return;
-        const list = Array.isArray(d.places) ? d.places : [];
+        const list = (Array.isArray(d.places) ? d.places : []).map(expand);
         setImported(list);
         setLibrary(list.length ? "ready" : "seed-only");
       })
@@ -488,7 +489,7 @@ function PlaceCard({ r, rank, mode, weather, food, open, onToggle, t }) {
         <div className="cname">{p.name}</div>
         <div className="cwhere">{p.where} · {p.priceHint}</div>
         <div className="meta">
-          {p.kindLabel && <span className="m kind">{p.kindLabel}</span>}
+          {labelFor(p) && <span className="m kind">{labelFor(p)}</span>}
           <span className={`m ${p.setting}`}>{t(`card.${p.setting}`)}</span>
           <span className="m">{r.travel.minutes} {t(r.travel.mode === "walk" ? "card.walk" : "card.transit")}</span>
           <span className="m">{r.km.toFixed(1)} km</span>

@@ -12,6 +12,7 @@
  */
 import { writeFile, mkdir, readFile } from "node:fs/promises";
 import { overpass, sleep } from "./lib/overpass.mjs";
+import { toCompact } from "./lib/compact.mjs";
 
 const OUT = new URL("../public/places-osm.json", import.meta.url);
 // Berlin's bounding box. An area lookup (area["name"="Berlin"]) only works on
@@ -190,9 +191,10 @@ await writeFile(
       _note:
         "Imported from OpenStreetMap by scripts/import-osm.mjs. Facilities come from OSM tags: 'unknown' means nobody has tagged it, not 'no'. Opening hours are category defaults unless openingHours holds the real OSM value.",
       importedAt: new Date().toISOString().slice(0, 10),
+      format: "compact-1",
       count: places.length,
       source: "OpenStreetMap contributors (ODbL)",
-      places,
+      places: places.map((p) => (p.i ? p : toCompact(p))),
     },
     null,
     0
