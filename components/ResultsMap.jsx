@@ -13,6 +13,9 @@ export default function ResultsMap({ origin, maxKm, results, others = [], onPick
   const map = useRef(null);
   const markers = useRef([]);
   const ready = useRef(false);
+  const onPickRef = useRef(onPick);
+
+  useEffect(() => { onPickRef.current = onPick; }, [onPick]);
 
   // create the map once
   useEffect(() => {
@@ -34,6 +37,13 @@ export default function ResultsMap({ origin, maxKm, results, others = [], onPick
         if (cancelled) return;
         ready.current = true;
         map.current.addSource("radius", { type: "geojson", data: emptyFc() });
+        map.current.addSource("others", {
+          type: "geojson",
+          data: emptyFc(),
+          cluster: true,
+          clusterRadius: 48,
+          clusterMaxZoom: 15,
+        });
         map.current.addLayer({
           id: "radius-fill",
           type: "fill",
@@ -46,6 +56,70 @@ export default function ResultsMap({ origin, maxKm, results, others = [], onPick
           source: "radius",
           paint: { "line-color": "#0e6b5c", "line-width": 1.5, "line-opacity": 0.45, "line-dasharray": [3, 2] },
         });
+        // the crowd: clustered bubbles that open up as you zoom in
+        map.current.addLayer({
+          id: "others-cluster",
+          type: "circle",
+          source: "others",
+          filter: ["has", "point_count"],
+          paint: {
+            "circle-color": "#15202a",
+            "circle-opacity": 0.82,
+            "circle-radius": ["step", ["get", "point_count"], 15, 10, 19, 50, 24, 200, 30],
+            "circle-stroke-width": 2,
+            "circle-stroke-color": "#ffffff",
+          },
+        });
+        map.current.addLayer({
+          id: "others-count",
+          type: "symbol",
+          source: "others",
+          filter: ["has", "point_count"],
+          layout: { "text-field": ["get", "point_count_abbreviated"], "text-size": 12 },
+          paint: { "text-color": "#ffffff" },
+        });
+        map.current.addLayer({
+          id: "others-point",
+          type: "circle",
+          source: "others",
+          filter: ["!", ["has", "point_count"]],
+          paint: {
+            "circle-color": ["match", ["get", "kind"],
+              "playground", "#9ED98B",
+              "park", "#9ED98B",
+              "library", "#F2668B",
+              "museum", "#B9A6F5",
+              "pool", "#8FD0F5",
+              "lake", "#8FD0F5",
+              "farm", "#FFC845",
+              "zoo", "#FFC845",
+              "#ffffff"],
+            "circle-radius": 7,
+            "circle-stroke-width": 2,
+            "circle-stroke-color": "#15202a",
+          },
+        });
+
+        map.current.on("click", "others-cluster", async (e) => {
+          const f = map.current.queryRenderedFeatures(e.point, { layers: ["others-cluster"] })[0];
+          if (!f) return;
+          const zoom = await map.current.getSource("others").getClusterExpansionZoom(f.properties.cluster_id);
+          map.current.easeTo({ center: f.geometry.coordinates, zoom });
+        });
+        map.current.on("click", "others-point", (e) => {
+          const f = e.features?.[0];
+          if (!f) return;
+          new maplibre.Popup({ offset: 14, closeButton: false })
+            .setLngLat(f.geometry.coordinates)
+            .setHTML(`<b>${f.properties.name}</b><br><span class="pop-where">${f.properties.sub}</span>`)
+            .addTo(map.current);
+          onPickRef.current?.(f.properties.id);
+        });
+        for (const layer of ["others-cluster", "others-point"]) {
+          map.current.on("mouseenter", layer, () => { map.current.getCanvas().style.cursor = "pointer"; });
+          map.current.on("mouseleave", layer, () => { map.current.getCanvas().style.cursor = ""; });
+        }
+
         draw();
       });
     })();
@@ -82,20 +156,21 @@ export default function ResultsMap({ origin, maxKm, results, others = [], onPick
         .addTo(m)
     );
 
-    for (const o of others) {
-      const el = dot("other");
-      el.title = o.place.name;
-      markers.current.push(
-        new maplibre.Marker({ element: el, anchor: "center" })
-          .setLngLat([o.place.lon, o.place.lat])
-          .setPopup(
-            new maplibre.Popup({ offset: 14, closeButton: false }).setHTML(
-              `<b>${esc(o.place.name)}</b><br>${o.travel.minutes} min · ${o.km.toFixed(1)} km`
-            )
-          )
-          .addTo(m)
-      );
-    }
+    // every other open place, as map data rather than thousands of DOM pins
+    m.getSource("others")?.setData({
+      type: "FeatureCollection",
+      features: others.map((o) => ({
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [o.place.lon, o.place.lat] },
+        properties: {
+          id: o.place.id,
+          name: o.place.name,
+          kind: o.place.kind || "other",
+          sub: `${o.place.where} · ${o.travel.minutes} min · ${o.km.toFixed(1)} km`,
+        },
+      })),
+    });
+
 
     results.forEach((r, i) => {
       const el = pin(i + 1, i === 0);

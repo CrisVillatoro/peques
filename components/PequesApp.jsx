@@ -203,6 +203,7 @@ export default function PequesApp({ places: seedPlaces, food }) {
         maxKm,
         limit: 12,
         kinds: kindFilter ? [kindFilter] : null,
+        browseLimit: 2500,
       }),
     [places, origin, withAges, choice, weather, when, maxKm, kindFilter]
   );
@@ -213,7 +214,6 @@ export default function PequesApp({ places: seedPlaces, food }) {
   const allKinds = unfiltered.byKind;
 
   const picks = useMemo(() => ranking.results.slice(0, 3), [ranking]);
-  const runnersUp = useMemo(() => ranking.results.slice(3), [ranking]);
   const rest = useMemo(() => {
     const taken = new Set(picks.map((r) => r.place.id));
     return (ranking.browse || []).filter((r) => !taken.has(r.place.id));
@@ -463,7 +463,7 @@ export default function PequesApp({ places: seedPlaces, food }) {
                 origin={origin}
                 maxKm={maxKm}
                 results={picks}
-                others={runnersUp}
+                others={rest}
                 onPick={(id) => { setOpenId(id); setView("list"); }}
               />
             )}
