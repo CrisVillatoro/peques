@@ -124,3 +124,26 @@ from the footer — a public page on a German domain normally needs both.
 Weather: [Open-Meteo](https://open-meteo.com/) using the DWD ICON model.
 Places and facilities you import: © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright), ODbL.
 Keep both credits visible in the app footer.
+
+## 7. Saving places (optional, needs Supabase)
+
+Without any setup, hearts and visits are kept in the visitor's own browser.
+To make them follow a person between phone and laptop:
+
+1. Create a new Supabase project (region: **Frankfurt**) at supabase.com.
+2. SQL editor → paste `supabase/migrations/0001_saved_places.sql` → Run.
+3. Authentication → Providers → turn on **Anonymous sign-ins**.
+4. Settings → API → copy the Project URL and the `anon` key.
+5. `cp .env.local.example .env.local` and paste both values, then restart `npm run dev`.
+
+For the published site, the same two values have to exist when you run
+`npm run build` — they are baked into the static files.
+
+**What is stored:** the places someone saved, and after an outing a rating
+(loved / ok / not for us) with the place's name and coordinates. Nothing else.
+No child names, no photos, no location history. Row Level Security means each
+account can only ever read its own rows, and deleting the account deletes them.
+
+**Before you share the link publicly**, add your Impressum and privacy policy —
+with accounts you are processing personal data (an email address), even if it is
+only your friends.

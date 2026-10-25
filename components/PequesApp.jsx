@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { distanceKm, rankPlaces, weatherSentence, whySentence } from "../lib/rules";
 import { countBySource, mergePlaces } from "../lib/merge";
 import { expand, KINDS, labelFor } from "../lib/places";
+import { useSaved } from "../lib/saved";
 import { fetchWeather, FORECAST_DAYS } from "../lib/weather";
 import { QUICK_PLACES, RADIUS_OPTIONS, searchPlaces } from "../lib/geocode";
 import {
@@ -89,6 +90,7 @@ export default function PequesApp({ places: seedPlaces, food }) {
     if (typeof document !== "undefined") document.documentElement.lang = lang;
   }, [lang]);
 
+  const saved = useSaved();
   const days = useMemo(() => dayOptions(new Date(), lang), [lang]);
   const slots = useMemo(() => slotsFor(dateIso, new Date()), [dateIso]);
   const when = useMemo(() => resolveWhen(dateIso, slotKey, new Date()), [dateIso, slotKey]);
@@ -469,6 +471,24 @@ export default function PequesApp({ places: seedPlaces, food }) {
       </section>
 
       <section className="results" aria-live="polite">
+        {saved.favourites.length > 0 && (
+          <div className="savedbox">
+            <p className="label" style={{ marginTop: 0 }}>♥ {t("saved.title")} <span className="count">{saved.favourites.length}</span></p>
+            <ul className="savedlist">
+              {saved.favourites.slice(0, 6).map((f) => (
+                <li key={f.placeId}>
+                  <a href={`https://www.google.com/maps/dir/?api=1&destination=${f.place.lat},${f.place.lon}&travelmode=transit`} target="_blank" rel="noreferrer">
+                    {f.place.name}
+                  </a>
+                  <span>{f.place.kindLabel || ""} {f.place.where ? `· ${f.place.where}` : ""}</span>
+                  <button type="button" onClick={() => saved.toggleFavourite(f.place)} aria-label={t("saved.remove")}>♥</button>
+                </li>
+              ))}
+            </ul>
+            <KeepPrompt t={t} saved={saved} />
+          </div>
+        )}
+
         {library === "loading" && (
           <div className="loading" role="status" aria-live="polite">
             <div className="spinner small" />
@@ -556,6 +576,7 @@ export default function PequesApp({ places: seedPlaces, food }) {
                 open={openId === r.place.id || (i === 0 && !openId)}
                 onToggle={() => setOpenId(openId === r.place.id ? null : r.place.id)}
                 t={t}
+                saved={saved}
               />
             ))}
 
@@ -591,6 +612,7 @@ export default function PequesApp({ places: seedPlaces, food }) {
                             open
                             onToggle={() => setOpenId(null)}
                             t={t}
+                            saved={saved}
                           />
                         )}
                       </li>
@@ -632,7 +654,44 @@ export default function PequesApp({ places: seedPlaces, food }) {
   );
 }
 
-function PlaceCard({ r, rank, mode, weather, food, open, onToggle, t }) {
+function KeepPrompt({ t, saved }) {
+  const [email, setEmail] = useState("");
+  const [state, setState] = useState("idle"); // idle | done | error
+
+  if (!saved.hasBackend) return <p className="keep-note">{t("saved.localOnly")}</p>;
+  if (state === "done") return <p className="keep-note">{t("saved.keepDone")}</p>;
+
+  return (
+    <form
+      className="keep"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        try {
+          const { keepWithEmail } = await import("../lib/supabase");
+          await keepWithEmail(email.trim());
+          setState("done");
+        } catch {
+          setState("error");
+        }
+      }}
+    >
+      <label htmlFor="keep-email">{t("saved.keep")}</label>
+      <div className="keep-row">
+        <input
+          id="keep-email"
+          type="email"
+          required
+          placeholder="du@example.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <button type="submit">OK</button>
+      </div>
+    </form>
+  );
+}
+
+function PlaceCard({ r, rank, mode, weather, food, open, onToggle, t, saved }) {
   const p = r.place;
   const nearbyFood = useMemo(() => {
     if (!food?.length) return [];
@@ -648,6 +707,17 @@ function PlaceCard({ r, rank, mode, weather, food, open, onToggle, t }) {
       <div className="art">
         <Art kind={p.tags?.[0] || p.setting} seed={p.id} />
         {rank === 0 && <span className="rank">{t("results.top")}</span>}
+        {saved && (
+          <button
+            type="button"
+            className={`heart ${saved.isFavourite(p.id) ? "on" : ""}`}
+            aria-pressed={saved.isFavourite(p.id)}
+            aria-label={t(saved.isFavourite(p.id) ? "saved.remove" : "saved.add")}
+            onClick={(e) => { e.stopPropagation(); saved.toggleFavourite(p); }}
+          >
+            {saved.isFavourite(p.id) ? "♥" : "♡"}
+          </button>
+        )}
       </div>
       <div className="cbody">
         <div className="cname">{p.name}</div>
@@ -708,6 +778,28 @@ function PlaceCard({ r, rank, mode, weather, food, open, onToggle, t }) {
                 ))}
               </>
             )}
+            {saved && (
+              <div className="visit">
+                <span className="visit-q">{t("visit.question")}</span>
+                <div className="visit-row">
+                  {[["loved", t("visit.loved")], ["ok", t("visit.ok")], ["no", t("visit.no")]].map(([value, label]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      className={`vbtn ${value}`}
+                      aria-pressed={saved.lastVisit(p.id)?.rating === value}
+                      onClick={() => saved.recordVisit(p, value)}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                {saved.lastVisit(p.id) && (
+                  <span className="visit-done">{t("visit.saved", { date: saved.lastVisit(p.id).at })}</span>
+                )}
+              </div>
+            )}
+
             <div className="actions">
               <a
                 className="primary"
