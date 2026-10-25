@@ -4,369 +4,849 @@
   "places": [
     {
       "id": "anoha",
-      "name": "ANOHA – Children's World",
-      "where": "Jewish Museum · Kreuzberg",
-      "lat": 52.5018, "lon": 13.3949, "approxCoords": true,
-      "setting": "indoor", "covered": 1,
-      "free": true, "priceHint": "Free, timed tickets",
-      "typicalOpen": "10:00", "typicalClose": "17:00", "closedDay": null,
-      "fit": { "b": 2, "t": 4, "p": 5, "s": 5 },
-      "facilities": { "changing": "yes", "stroller": "yes", "highchair": "unknown", "playArea": "yes" },
+      "name": "ANOHA – Die Kinderwelt des Jüdischen Museums",
+      "where": "Jüdisches Museum · Kreuzberg",
+      "lat": 52.5018,
+      "lon": 13.3949,
+      "approxCoords": true,
+      "setting": "indoor",
+      "covered": 1,
+      "free": true,
+      "priceHint": "Free, timed tickets",
+      "typicalOpen": "10:00",
+      "typicalClose": "17:00",
+      "closedDay": null,
+      "fit": {
+        "b": 2,
+        "t": 4,
+        "p": 5,
+        "s": 5
+      },
+      "facilities": {
+        "changing": "yes",
+        "stroller": "yes",
+        "highchair": "unknown",
+        "playArea": "yes"
+      },
       "url": "https://www.jmberlin.de/anoha",
-      "tags": ["museum", "play", "build"],
-      "note": "Large indoor world built around Noah's ark; book a slot."
+      "tags": [
+        "museum",
+        "play",
+        "build"
+      ],
+      "note": "Große Indoor-Welt rund um die Arche Noah; Zeitfenster buchen."
     },
     {
       "id": "labyrinth",
       "name": "Labyrinth Kindermuseum",
       "where": "Wedding",
-      "lat": 52.5562, "lon": 13.3759, "approxCoords": true,
-      "setting": "indoor", "covered": 1,
-      "free": false, "priceHint": "€€",
-      "typicalOpen": "09:00", "typicalClose": "18:00", "closedDay": 1,
-      "fit": { "b": 1, "t": 3, "p": 5, "s": 5 },
-      "facilities": { "changing": "yes", "stroller": "yes", "highchair": "unknown", "playArea": "yes" },
+      "lat": 52.5562,
+      "lon": 13.3759,
+      "approxCoords": true,
+      "setting": "indoor",
+      "covered": 1,
+      "free": false,
+      "priceHint": "€€",
+      "typicalOpen": "09:00",
+      "typicalClose": "18:00",
+      "closedDay": 1,
+      "fit": {
+        "b": 1,
+        "t": 3,
+        "p": 5,
+        "s": 5
+      },
+      "facilities": {
+        "changing": "yes",
+        "stroller": "yes",
+        "highchair": "unknown",
+        "playArea": "yes"
+      },
       "url": "https://www.labyrinth-kindermuseum.de/",
-      "tags": ["museum", "hands-on"],
-      "note": "Hands-on exhibitions, best from about 3 years."
+      "tags": [
+        "museum",
+        "hands-on"
+      ],
+      "note": "Mitmach-Ausstellungen, am besten ab etwa 3 Jahren."
     },
     {
       "id": "machmit",
       "name": "MACHmit! Museum für Kinder",
       "where": "Prenzlauer Berg",
-      "lat": 52.5399, "lon": 13.4188, "approxCoords": true,
-      "setting": "indoor", "covered": 1,
-      "free": false, "priceHint": "€",
-      "typicalOpen": "10:00", "typicalClose": "18:00", "closedDay": 1,
-      "fit": { "b": 2, "t": 4, "p": 5, "s": 5 },
-      "facilities": { "changing": "yes", "stroller": "unknown", "highchair": "unknown", "playArea": "yes" },
+      "lat": 52.5399,
+      "lon": 13.4188,
+      "approxCoords": true,
+      "setting": "indoor",
+      "covered": 1,
+      "free": false,
+      "priceHint": "€",
+      "typicalOpen": "10:00",
+      "typicalClose": "18:00",
+      "closedDay": 1,
+      "fit": {
+        "b": 2,
+        "t": 4,
+        "p": 5,
+        "s": 5
+      },
+      "facilities": {
+        "changing": "yes",
+        "stroller": "unknown",
+        "highchair": "unknown",
+        "playArea": "yes"
+      },
       "url": "https://machmitmuseum.de/",
-      "tags": ["museum", "climbing", "hands-on"],
-      "note": "Climbing maze and workshops inside an old church."
+      "tags": [
+        "museum",
+        "climbing",
+        "hands-on"
+      ],
+      "note": "Kletterlabyrinth und Werkstätten in einer alten Kirche."
     },
     {
       "id": "fez",
       "name": "FEZ-Berlin",
       "where": "Wuhlheide · Köpenick",
-      "lat": 52.4608, "lon": 13.5718, "approxCoords": true,
-      "setting": "mixed", "covered": 0.6,
-      "free": false, "priceHint": "€",
-      "typicalOpen": "10:00", "typicalClose": "18:00", "closedDay": null,
-      "fit": { "b": 2, "t": 4, "p": 5, "s": 5 },
-      "facilities": { "changing": "yes", "stroller": "yes", "highchair": "unknown", "playArea": "yes" },
+      "lat": 52.4608,
+      "lon": 13.5718,
+      "approxCoords": true,
+      "setting": "mixed",
+      "covered": 0.6,
+      "free": false,
+      "priceHint": "€",
+      "typicalOpen": "10:00",
+      "typicalClose": "18:00",
+      "closedDay": null,
+      "fit": {
+        "b": 2,
+        "t": 4,
+        "p": 5,
+        "s": 5
+      },
+      "facilities": {
+        "changing": "yes",
+        "stroller": "yes",
+        "highchair": "unknown",
+        "playArea": "yes"
+      },
       "url": "https://fez-berlin.de/",
-      "tags": ["indoor halls", "park", "events"],
-      "note": "Big family centre with indoor halls and a park around it."
+      "tags": [
+        "indoor halls",
+        "park",
+        "events"
+      ],
+      "note": "Großes Familienzentrum mit Hallen drinnen und Park drumherum."
     },
     {
       "id": "pinke-panke",
       "name": "Kinderbauernhof Pinke-Panke",
       "where": "Pankow",
-      "lat": 52.5703, "lon": 13.3962, "approxCoords": true,
-      "setting": "outdoor", "covered": 0.2,
-      "free": true, "priceHint": "Free",
-      "typicalOpen": "10:00", "typicalClose": "18:00", "closedDay": null,
-      "fit": { "b": 3, "t": 5, "p": 5, "s": 3 },
-      "facilities": { "changing": "unknown", "stroller": "yes", "highchair": "no", "playArea": "yes" },
+      "lat": 52.5703,
+      "lon": 13.3962,
+      "approxCoords": true,
+      "setting": "outdoor",
+      "covered": 0.2,
+      "free": true,
+      "priceHint": "Gratis",
+      "typicalOpen": "10:00",
+      "typicalClose": "18:00",
+      "closedDay": null,
+      "fit": {
+        "b": 3,
+        "t": 5,
+        "p": 5,
+        "s": 3
+      },
+      "facilities": {
+        "changing": "unknown",
+        "stroller": "yes",
+        "highchair": "no",
+        "playArea": "yes"
+      },
       "url": "https://www.kinderbauernhof-pinke-panke.de/",
-      "tags": ["animals", "farm", "sand"],
-      "note": "Small city farm with goats, rabbits and a sandpit."
+      "tags": [
+        "animals",
+        "farm",
+        "sand"
+      ],
+      "note": "Kleiner Stadtbauernhof mit Ziegen, Kaninchen und Sandkasten."
     },
     {
       "id": "mauerplatz",
       "name": "Kinderbauernhof am Mauerplatz",
       "where": "Kreuzberg",
-      "lat": 52.5026, "lon": 13.4183, "approxCoords": true,
-      "setting": "outdoor", "covered": 0.2,
-      "free": true, "priceHint": "Free",
-      "typicalOpen": "10:00", "typicalClose": "18:00", "closedDay": 1,
-      "fit": { "b": 2, "t": 5, "p": 5, "s": 4 },
-      "facilities": { "changing": "unknown", "stroller": "yes", "highchair": "no", "playArea": "yes" },
+      "lat": 52.5026,
+      "lon": 13.4183,
+      "approxCoords": true,
+      "setting": "outdoor",
+      "covered": 0.2,
+      "free": true,
+      "priceHint": "Gratis",
+      "typicalOpen": "10:00",
+      "typicalClose": "18:00",
+      "closedDay": 1,
+      "fit": {
+        "b": 2,
+        "t": 5,
+        "p": 5,
+        "s": 4
+      },
+      "facilities": {
+        "changing": "unknown",
+        "stroller": "yes",
+        "highchair": "no",
+        "playArea": "yes"
+      },
       "url": "https://kinderbauernhof-mauerplatz.de/",
-      "tags": ["animals", "farm"],
-      "note": "City farm close to the centre."
+      "tags": [
+        "animals",
+        "farm"
+      ],
+      "note": "Stadtbauernhof nah am Zentrum."
     },
     {
       "id": "tierpark",
       "name": "Tierpark Berlin",
       "where": "Friedrichsfelde",
-      "lat": 52.5022, "lon": 13.5306, "approxCoords": true,
-      "setting": "mixed", "covered": 0.4,
-      "free": false, "priceHint": "€€",
-      "typicalOpen": "09:00", "typicalClose": "18:00", "closedDay": null,
-      "fit": { "b": 3, "t": 5, "p": 5, "s": 5 },
-      "facilities": { "changing": "yes", "stroller": "yes", "highchair": "yes", "playArea": "yes" },
+      "lat": 52.5022,
+      "lon": 13.5306,
+      "approxCoords": true,
+      "setting": "mixed",
+      "covered": 0.4,
+      "free": false,
+      "priceHint": "€€",
+      "typicalOpen": "09:00",
+      "typicalClose": "18:00",
+      "closedDay": null,
+      "fit": {
+        "b": 3,
+        "t": 5,
+        "p": 5,
+        "s": 5
+      },
+      "facilities": {
+        "changing": "yes",
+        "stroller": "yes",
+        "highchair": "yes",
+        "playArea": "yes"
+      },
       "url": "https://www.tierpark-berlin.de/",
-      "tags": ["animals", "walking"],
-      "note": "Huge park with animal houses to shelter in."
+      "tags": [
+        "animals",
+        "walking"
+      ],
+      "note": "Riesiger Park mit Tierhäusern zum Unterstellen."
     },
     {
       "id": "zoo",
       "name": "Zoologischer Garten",
       "where": "Charlottenburg",
-      "lat": 52.5079, "lon": 13.3379, "approxCoords": true,
-      "setting": "mixed", "covered": 0.4,
-      "free": false, "priceHint": "€€",
-      "typicalOpen": "09:00", "typicalClose": "18:00", "closedDay": null,
-      "fit": { "b": 3, "t": 5, "p": 5, "s": 5 },
-      "facilities": { "changing": "yes", "stroller": "yes", "highchair": "yes", "playArea": "yes" },
+      "lat": 52.5079,
+      "lon": 13.3379,
+      "approxCoords": true,
+      "setting": "mixed",
+      "covered": 0.4,
+      "free": false,
+      "priceHint": "€€",
+      "typicalOpen": "09:00",
+      "typicalClose": "18:00",
+      "closedDay": null,
+      "fit": {
+        "b": 3,
+        "t": 5,
+        "p": 5,
+        "s": 5
+      },
+      "facilities": {
+        "changing": "yes",
+        "stroller": "yes",
+        "highchair": "yes",
+        "playArea": "yes"
+      },
       "url": "https://www.zoo-berlin.de/",
-      "tags": ["animals"],
-      "note": "Central zoo, easy to reach by S-Bahn."
+      "tags": [
+        "animals"
+      ],
+      "note": "Zentraler Zoo, gut mit der S-Bahn zu erreichen."
     },
     {
       "id": "botanischer",
       "name": "Botanischer Garten",
       "where": "Lichterfelde",
-      "lat": 52.4573, "lon": 13.3050, "approxCoords": true,
-      "setting": "mixed", "covered": 0.5,
-      "free": false, "priceHint": "€",
-      "typicalOpen": "09:00", "typicalClose": "19:00", "closedDay": null,
-      "fit": { "b": 3, "t": 4, "p": 4, "s": 4 },
-      "facilities": { "changing": "yes", "stroller": "yes", "highchair": "unknown", "playArea": "no" },
+      "lat": 52.4573,
+      "lon": 13.305,
+      "approxCoords": true,
+      "setting": "mixed",
+      "covered": 0.5,
+      "free": false,
+      "priceHint": "€",
+      "typicalOpen": "09:00",
+      "typicalClose": "19:00",
+      "closedDay": null,
+      "fit": {
+        "b": 3,
+        "t": 4,
+        "p": 4,
+        "s": 4
+      },
+      "facilities": {
+        "changing": "yes",
+        "stroller": "yes",
+        "highchair": "unknown",
+        "playArea": "no"
+      },
       "url": "https://www.bo.berlin/",
-      "tags": ["garden", "greenhouse"],
-      "note": "Big greenhouses make it work on a wet day."
+      "tags": [
+        "garden",
+        "greenhouse"
+      ],
+      "note": "Die großen Gewächshäuser retten auch einen Regentag."
     },
     {
       "id": "domaene",
       "name": "Domäne Dahlem",
       "where": "Dahlem",
-      "lat": 52.4576, "lon": 13.2881, "approxCoords": true,
-      "setting": "mixed", "covered": 0.4,
-      "free": false, "priceHint": "€",
-      "typicalOpen": "10:00", "typicalClose": "18:00", "closedDay": 2,
-      "fit": { "b": 2, "t": 4, "p": 5, "s": 4 },
-      "facilities": { "changing": "yes", "stroller": "yes", "highchair": "yes", "playArea": "yes" },
+      "lat": 52.4576,
+      "lon": 13.2881,
+      "approxCoords": true,
+      "setting": "mixed",
+      "covered": 0.4,
+      "free": false,
+      "priceHint": "€",
+      "typicalOpen": "10:00",
+      "typicalClose": "18:00",
+      "closedDay": 2,
+      "fit": {
+        "b": 2,
+        "t": 4,
+        "p": 5,
+        "s": 4
+      },
+      "facilities": {
+        "changing": "yes",
+        "stroller": "yes",
+        "highchair": "yes",
+        "playArea": "yes"
+      },
       "url": "https://www.domaene-dahlem.de/",
-      "tags": ["farm", "animals", "market"],
-      "note": "Working farm museum with barns and a café."
+      "tags": [
+        "farm",
+        "animals",
+        "market"
+      ],
+      "note": "Landgut mit Scheunen, Tieren und Café."
     },
     {
       "id": "britzer",
       "name": "Britzer Garten",
       "where": "Neukölln",
-      "lat": 52.4332, "lon": 13.4175, "approxCoords": true,
-      "setting": "outdoor", "covered": 0.1,
-      "free": false, "priceHint": "€",
-      "typicalOpen": "09:00", "typicalClose": "19:00", "closedDay": null,
-      "fit": { "b": 3, "t": 5, "p": 5, "s": 5 },
-      "facilities": { "changing": "unknown", "stroller": "yes", "highchair": "unknown", "playArea": "yes" },
+      "lat": 52.4332,
+      "lon": 13.4175,
+      "approxCoords": true,
+      "setting": "outdoor",
+      "covered": 0.1,
+      "free": false,
+      "priceHint": "€",
+      "typicalOpen": "09:00",
+      "typicalClose": "19:00",
+      "closedDay": null,
+      "fit": {
+        "b": 3,
+        "t": 5,
+        "p": 5,
+        "s": 5
+      },
+      "facilities": {
+        "changing": "unknown",
+        "stroller": "yes",
+        "highchair": "unknown",
+        "playArea": "yes"
+      },
       "url": "https://gruen-berlin.de/britzer-garten",
-      "tags": ["park", "playground", "water"],
-      "note": "Large park with several playgrounds and a water area."
+      "tags": [
+        "park",
+        "playground",
+        "water"
+      ],
+      "note": "Großer Park mit mehreren Spielplätzen und Wasserbereich."
     },
     {
       "id": "gaerten-der-welt",
       "name": "Gärten der Welt",
       "where": "Marzahn",
-      "lat": 52.5346, "lon": 13.5829, "approxCoords": true,
-      "setting": "mixed", "covered": 0.3,
-      "free": false, "priceHint": "€",
-      "typicalOpen": "09:00", "typicalClose": "18:00", "closedDay": null,
-      "fit": { "b": 3, "t": 4, "p": 5, "s": 5 },
-      "facilities": { "changing": "yes", "stroller": "yes", "highchair": "unknown", "playArea": "yes" },
+      "lat": 52.5346,
+      "lon": 13.5829,
+      "approxCoords": true,
+      "setting": "mixed",
+      "covered": 0.3,
+      "free": false,
+      "priceHint": "€",
+      "typicalOpen": "09:00",
+      "typicalClose": "18:00",
+      "closedDay": null,
+      "fit": {
+        "b": 3,
+        "t": 4,
+        "p": 5,
+        "s": 5
+      },
+      "facilities": {
+        "changing": "yes",
+        "stroller": "yes",
+        "highchair": "unknown",
+        "playArea": "yes"
+      },
       "url": "https://gruen-berlin.de/gaerten-der-welt",
-      "tags": ["park", "playground", "cable car"],
-      "note": "Themed gardens, a big playground and a cable car."
+      "tags": [
+        "park",
+        "playground",
+        "cable car"
+      ],
+      "note": "Themengärten, großer Spielplatz und Seilbahn."
     },
     {
       "id": "volkspark-fhain",
-      "name": "Volkspark Friedrichshain playground",
+      "name": "Spielplätze im Volkspark Friedrichshain",
       "where": "Friedrichshain",
-      "lat": 52.5274, "lon": 13.4356, "approxCoords": true,
-      "setting": "outdoor", "covered": 0,
-      "free": true, "priceHint": "Free",
-      "typicalOpen": "00:00", "typicalClose": "23:59", "closedDay": null,
-      "fit": { "b": 3, "t": 5, "p": 5, "s": 5 },
-      "facilities": { "changing": "no", "stroller": "yes", "highchair": "no", "playArea": "yes" },
+      "lat": 52.5274,
+      "lon": 13.4356,
+      "approxCoords": true,
+      "setting": "outdoor",
+      "covered": 0,
+      "free": true,
+      "priceHint": "Gratis",
+      "typicalOpen": "00:00",
+      "typicalClose": "23:59",
+      "closedDay": null,
+      "fit": {
+        "b": 3,
+        "t": 5,
+        "p": 5,
+        "s": 5
+      },
+      "facilities": {
+        "changing": "no",
+        "stroller": "yes",
+        "highchair": "no",
+        "playArea": "yes"
+      },
       "url": "https://www.berlin.de/",
-      "tags": ["playground", "park"],
-      "note": "Several playgrounds inside the park."
+      "tags": [
+        "playground",
+        "park"
+      ],
+      "note": "Mehrere Spielplätze im Park verteilt."
     },
     {
       "id": "mauerpark",
-      "name": "Mauerpark playground",
+      "name": "Spielplatz im Mauerpark",
       "where": "Prenzlauer Berg",
-      "lat": 52.5422, "lon": 13.4024, "approxCoords": true,
-      "setting": "outdoor", "covered": 0,
-      "free": true, "priceHint": "Free",
-      "typicalOpen": "00:00", "typicalClose": "23:59", "closedDay": null,
-      "fit": { "b": 3, "t": 4, "p": 5, "s": 5 },
-      "facilities": { "changing": "no", "stroller": "yes", "highchair": "no", "playArea": "yes" },
+      "lat": 52.5422,
+      "lon": 13.4024,
+      "approxCoords": true,
+      "setting": "outdoor",
+      "covered": 0,
+      "free": true,
+      "priceHint": "Gratis",
+      "typicalOpen": "00:00",
+      "typicalClose": "23:59",
+      "closedDay": null,
+      "fit": {
+        "b": 3,
+        "t": 4,
+        "p": 5,
+        "s": 5
+      },
+      "facilities": {
+        "changing": "no",
+        "stroller": "yes",
+        "highchair": "no",
+        "playArea": "yes"
+      },
       "url": "https://www.berlin.de/",
-      "tags": ["playground", "park", "swings"],
-      "note": "Big playground with a sand area and swings."
+      "tags": [
+        "playground",
+        "park",
+        "swings"
+      ],
+      "note": "Großer Spielplatz mit Sandbereich und Schaukeln."
     },
     {
       "id": "kollwitzplatz",
       "name": "Spielplatz Kollwitzplatz",
       "where": "Prenzlauer Berg",
-      "lat": 52.5372, "lon": 13.4188, "approxCoords": true,
-      "setting": "outdoor", "covered": 0,
-      "free": true, "priceHint": "Free",
-      "typicalOpen": "00:00", "typicalClose": "23:59", "closedDay": null,
-      "fit": { "b": 3, "t": 5, "p": 4, "s": 3 },
-      "facilities": { "changing": "no", "stroller": "yes", "highchair": "no", "playArea": "yes" },
+      "lat": 52.5372,
+      "lon": 13.4188,
+      "approxCoords": true,
+      "setting": "outdoor",
+      "covered": 0,
+      "free": true,
+      "priceHint": "Gratis",
+      "typicalOpen": "00:00",
+      "typicalClose": "23:59",
+      "closedDay": null,
+      "fit": {
+        "b": 3,
+        "t": 5,
+        "p": 4,
+        "s": 3
+      },
+      "facilities": {
+        "changing": "no",
+        "stroller": "yes",
+        "highchair": "no",
+        "playArea": "yes"
+      },
       "url": "https://www.berlin.de/",
-      "tags": ["playground", "toddler"],
-      "note": "Small, fenced and close to cafés."
+      "tags": [
+        "playground",
+        "toddler"
+      ],
+      "note": "Klein, eingezäunt und direkt bei den Cafés."
     },
     {
       "id": "tempelhofer-feld",
       "name": "Tempelhofer Feld",
       "where": "Tempelhof",
-      "lat": 52.4752, "lon": 13.4032, "approxCoords": true,
-      "setting": "outdoor", "covered": 0,
-      "free": true, "priceHint": "Free",
-      "typicalOpen": "07:00", "typicalClose": "20:00", "closedDay": null,
-      "fit": { "b": 2, "t": 4, "p": 5, "s": 5 },
-      "facilities": { "changing": "no", "stroller": "yes", "highchair": "no", "playArea": "yes" },
+      "lat": 52.4752,
+      "lon": 13.4032,
+      "approxCoords": true,
+      "setting": "outdoor",
+      "covered": 0,
+      "free": true,
+      "priceHint": "Gratis",
+      "typicalOpen": "07:00",
+      "typicalClose": "20:00",
+      "closedDay": null,
+      "fit": {
+        "b": 2,
+        "t": 4,
+        "p": 5,
+        "s": 5
+      },
+      "facilities": {
+        "changing": "no",
+        "stroller": "yes",
+        "highchair": "no",
+        "playArea": "yes"
+      },
       "url": "https://gruen-berlin.de/tempelhofer-feld",
-      "tags": ["running", "bikes", "kites"],
-      "note": "Open former airfield: great on a dry, not-too-windy day."
+      "tags": [
+        "running",
+        "bikes",
+        "kites"
+      ],
+      "note": "Weites altes Flugfeld: super an trockenen, windstillen Tagen."
     },
     {
       "id": "treptower",
-      "name": "Treptower Park & Spreepark playground",
+      "name": "Treptower Park",
       "where": "Treptow",
-      "lat": 52.4885, "lon": 13.4690, "approxCoords": true,
-      "setting": "outdoor", "covered": 0,
-      "free": true, "priceHint": "Free",
-      "typicalOpen": "00:00", "typicalClose": "23:59", "closedDay": null,
-      "fit": { "b": 3, "t": 4, "p": 5, "s": 5 },
-      "facilities": { "changing": "no", "stroller": "yes", "highchair": "no", "playArea": "yes" },
+      "lat": 52.4885,
+      "lon": 13.469,
+      "approxCoords": true,
+      "setting": "outdoor",
+      "covered": 0,
+      "free": true,
+      "priceHint": "Gratis",
+      "typicalOpen": "00:00",
+      "typicalClose": "23:59",
+      "closedDay": null,
+      "fit": {
+        "b": 3,
+        "t": 4,
+        "p": 5,
+        "s": 5
+      },
+      "facilities": {
+        "changing": "no",
+        "stroller": "yes",
+        "highchair": "no",
+        "playArea": "yes"
+      },
       "url": "https://www.berlin.de/",
-      "tags": ["park", "river", "playground"],
-      "note": "Riverside park with wide paths for the stroller."
+      "tags": [
+        "park",
+        "river",
+        "playground"
+      ],
+      "note": "Park an der Spree mit breiten Wegen für den Kinderwagen."
     },
     {
       "id": "agb-kinder",
-      "name": "Children's library, Amerika-Gedenkbibliothek",
+      "name": "Kinderbibliothek der Amerika-Gedenkbibliothek",
       "where": "Kreuzberg",
-      "lat": 52.4951, "lon": 13.3918, "approxCoords": true,
-      "setting": "indoor", "covered": 1,
-      "free": true, "priceHint": "Free",
-      "typicalOpen": "10:00", "typicalClose": "19:00", "closedDay": 0,
-      "fit": { "b": 4, "t": 5, "p": 5, "s": 4 },
-      "facilities": { "changing": "yes", "stroller": "yes", "highchair": "no", "playArea": "yes" },
+      "lat": 52.4951,
+      "lon": 13.3918,
+      "approxCoords": true,
+      "setting": "indoor",
+      "covered": 1,
+      "free": true,
+      "priceHint": "Gratis",
+      "typicalOpen": "10:00",
+      "typicalClose": "19:00",
+      "closedDay": 0,
+      "fit": {
+        "b": 4,
+        "t": 5,
+        "p": 5,
+        "s": 4
+      },
+      "facilities": {
+        "changing": "yes",
+        "stroller": "yes",
+        "highchair": "no",
+        "playArea": "yes"
+      },
       "url": "https://www.zlb.de/",
-      "tags": ["library", "quiet", "books"],
-      "note": "Free, warm and quiet. Good for a short rainy hour."
+      "tags": [
+        "library",
+        "quiet",
+        "books"
+      ],
+      "note": "Kostenlos, warm und ruhig. Gut für eine kurze Regenstunde."
     },
     {
       "id": "naturkunde",
       "name": "Museum für Naturkunde",
       "where": "Mitte",
-      "lat": 52.5304, "lon": 13.3815, "approxCoords": true,
-      "setting": "indoor", "covered": 1,
-      "free": false, "priceHint": "€€",
-      "typicalOpen": "09:30", "typicalClose": "18:00", "closedDay": 1,
-      "fit": { "b": 2, "t": 3, "p": 5, "s": 5 },
-      "facilities": { "changing": "yes", "stroller": "yes", "highchair": "unknown", "playArea": "no" },
+      "lat": 52.5304,
+      "lon": 13.3815,
+      "approxCoords": true,
+      "setting": "indoor",
+      "covered": 1,
+      "free": false,
+      "priceHint": "€€",
+      "typicalOpen": "09:30",
+      "typicalClose": "18:00",
+      "closedDay": 1,
+      "fit": {
+        "b": 2,
+        "t": 3,
+        "p": 5,
+        "s": 5
+      },
+      "facilities": {
+        "changing": "yes",
+        "stroller": "yes",
+        "highchair": "unknown",
+        "playArea": "no"
+      },
       "url": "https://www.museumfuernaturkunde.berlin/",
-      "tags": ["dinosaurs", "museum"],
-      "note": "Dinosaur skeletons; toddlers mostly like the big hall."
+      "tags": [
+        "dinosaurs",
+        "museum"
+      ],
+      "note": "Dinosaurierskelette; Kleinkinder mögen vor allem den großen Saal."
     },
     {
       "id": "spectrum",
       "name": "Science Center Spectrum (Technikmuseum)",
       "where": "Kreuzberg",
-      "lat": 52.4987, "lon": 13.3775, "approxCoords": true,
-      "setting": "indoor", "covered": 1,
-      "free": false, "priceHint": "€€",
-      "typicalOpen": "09:00", "typicalClose": "17:30", "closedDay": 1,
-      "fit": { "b": 1, "t": 3, "p": 4, "s": 5 },
-      "facilities": { "changing": "yes", "stroller": "yes", "highchair": "unknown", "playArea": "no" },
+      "lat": 52.4987,
+      "lon": 13.3775,
+      "approxCoords": true,
+      "setting": "indoor",
+      "covered": 1,
+      "free": false,
+      "priceHint": "€€",
+      "typicalOpen": "09:00",
+      "typicalClose": "17:30",
+      "closedDay": 1,
+      "fit": {
+        "b": 1,
+        "t": 3,
+        "p": 4,
+        "s": 5
+      },
+      "facilities": {
+        "changing": "yes",
+        "stroller": "yes",
+        "highchair": "unknown",
+        "playArea": "no"
+      },
       "url": "https://technikmuseum.berlin/",
-      "tags": ["experiments", "museum"],
-      "note": "Hands-on experiments; better with older kids along."
+      "tags": [
+        "experiments",
+        "museum"
+      ],
+      "note": "Experimente zum Anfassen; besser mit größeren Kindern dabei."
     },
     {
       "id": "hamburger-bahnhof",
       "name": "Hamburger Bahnhof",
       "where": "Moabit",
-      "lat": 52.5290, "lon": 13.3703, "approxCoords": true,
-      "setting": "indoor", "covered": 1,
-      "free": false, "priceHint": "€€",
-      "typicalOpen": "10:00", "typicalClose": "18:00", "closedDay": 1,
-      "fit": { "b": 2, "t": 4, "p": 4, "s": 4 },
-      "facilities": { "changing": "yes", "stroller": "yes", "highchair": "unknown", "playArea": "no" },
+      "lat": 52.529,
+      "lon": 13.3703,
+      "approxCoords": true,
+      "setting": "indoor",
+      "covered": 1,
+      "free": false,
+      "priceHint": "€€",
+      "typicalOpen": "10:00",
+      "typicalClose": "18:00",
+      "closedDay": 1,
+      "fit": {
+        "b": 2,
+        "t": 4,
+        "p": 4,
+        "s": 4
+      },
+      "facilities": {
+        "changing": "yes",
+        "stroller": "yes",
+        "highchair": "unknown",
+        "playArea": "no"
+      },
       "url": "https://www.smb.museum/museen-einrichtungen/hamburger-bahnhof/",
-      "tags": ["art", "big halls"],
-      "note": "Large halls with room to walk; check the family programme."
+      "tags": [
+        "art",
+        "big halls"
+      ],
+      "note": "Große Hallen mit viel Platz zum Laufen; Familienprogramm prüfen."
     },
     {
       "id": "legoland",
       "name": "Legoland Discovery Centre",
       "where": "Potsdamer Platz",
-      "lat": 52.5100, "lon": 13.3740, "approxCoords": true,
-      "setting": "indoor", "covered": 1,
-      "free": false, "priceHint": "€€€",
-      "typicalOpen": "10:00", "typicalClose": "19:00", "closedDay": null,
-      "fit": { "b": 1, "t": 4, "p": 5, "s": 5 },
-      "facilities": { "changing": "yes", "stroller": "yes", "highchair": "yes", "playArea": "yes" },
+      "lat": 52.51,
+      "lon": 13.374,
+      "approxCoords": true,
+      "setting": "indoor",
+      "covered": 1,
+      "free": false,
+      "priceHint": "€€€",
+      "typicalOpen": "10:00",
+      "typicalClose": "19:00",
+      "closedDay": null,
+      "fit": {
+        "b": 1,
+        "t": 4,
+        "p": 5,
+        "s": 5
+      },
+      "facilities": {
+        "changing": "yes",
+        "stroller": "yes",
+        "highchair": "yes",
+        "playArea": "yes"
+      },
       "url": "https://www.legolanddiscoverycentre.de/berlin/",
-      "tags": ["indoor play", "duplo"],
-      "note": "Expensive, but reliable on a long rainy day; book online."
+      "tags": [
+        "indoor play",
+        "duplo"
+      ],
+      "note": "Teuer, aber verlässlich an einem langen Regentag; vorher buchen."
     },
     {
       "id": "jolos",
-      "name": "Jolos Kinderwelt (indoor playground)",
+      "name": "Jolos Kinderwelt",
       "where": "Lichtenberg",
-      "lat": 52.5290, "lon": 13.5070, "approxCoords": true,
-      "setting": "indoor", "covered": 1,
-      "free": false, "priceHint": "€€",
-      "typicalOpen": "10:00", "typicalClose": "19:00", "closedDay": null,
-      "fit": { "b": 2, "t": 5, "p": 5, "s": 4 },
-      "facilities": { "changing": "yes", "stroller": "yes", "highchair": "yes", "playArea": "yes" },
+      "lat": 52.529,
+      "lon": 13.507,
+      "approxCoords": true,
+      "setting": "indoor",
+      "covered": 1,
+      "free": false,
+      "priceHint": "€€",
+      "typicalOpen": "10:00",
+      "typicalClose": "19:00",
+      "closedDay": null,
+      "fit": {
+        "b": 2,
+        "t": 5,
+        "p": 5,
+        "s": 4
+      },
+      "facilities": {
+        "changing": "yes",
+        "stroller": "yes",
+        "highchair": "yes",
+        "playArea": "yes"
+      },
       "url": "https://www.jolos-kinderwelt.de/",
-      "tags": ["indoor play", "toddler area"],
-      "note": "Indoor playground with a separate toddler area."
+      "tags": [
+        "indoor play",
+        "toddler area"
+      ],
+      "note": "Indoor-Spielplatz mit eigenem Kleinkindbereich."
     },
     {
       "id": "plansche",
-      "name": "Water playground / Plansche (seasonal)",
+      "name": "Wasserspielplatz / Plansche",
       "where": "Friedrichshain",
-      "lat": 52.5283, "lon": 13.4327, "approxCoords": true,
-      "setting": "outdoor", "covered": 0,
-      "free": true, "priceHint": "Free",
-      "typicalOpen": "10:00", "typicalClose": "19:00", "closedDay": null,
-      "season": [5, 9], "hotWeatherFavourite": true,
-      "fit": { "b": 3, "t": 5, "p": 5, "s": 4 },
-      "facilities": { "changing": "no", "stroller": "yes", "highchair": "no", "playArea": "yes" },
+      "lat": 52.5283,
+      "lon": 13.4327,
+      "approxCoords": true,
+      "setting": "outdoor",
+      "covered": 0,
+      "free": true,
+      "priceHint": "Gratis",
+      "typicalOpen": "10:00",
+      "typicalClose": "19:00",
+      "closedDay": null,
+      "season": [
+        5,
+        9
+      ],
+      "hotWeatherFavourite": true,
+      "fit": {
+        "b": 3,
+        "t": 5,
+        "p": 5,
+        "s": 4
+      },
+      "facilities": {
+        "changing": "no",
+        "stroller": "yes",
+        "highchair": "no",
+        "playArea": "yes"
+      },
       "url": "https://www.berlin.de/",
-      "tags": ["water", "summer"],
-      "note": "Open in the warm months only; check that it is running."
+      "tags": [
+        "water",
+        "summer"
+      ],
+      "note": "Nur in den warmen Monaten offen; vorher prüfen, ob sie läuft."
     },
     {
       "id": "strandbad-weissensee",
-      "name": "Strandbad Weißensee (seasonal)",
+      "name": "Strandbad Weißensee",
       "where": "Weißensee",
-      "lat": 52.5553, "lon": 13.4661, "approxCoords": true,
-      "setting": "outdoor", "covered": 0,
-      "free": false, "priceHint": "€",
-      "typicalOpen": "10:00", "typicalClose": "19:00", "closedDay": null,
-      "season": [5, 9], "hotWeatherFavourite": true,
-      "fit": { "b": 3, "t": 5, "p": 5, "s": 5 },
-      "facilities": { "changing": "yes", "stroller": "yes", "highchair": "no", "playArea": "yes" },
+      "lat": 52.5553,
+      "lon": 13.4661,
+      "approxCoords": true,
+      "setting": "outdoor",
+      "covered": 0,
+      "free": false,
+      "priceHint": "€",
+      "typicalOpen": "10:00",
+      "typicalClose": "19:00",
+      "closedDay": null,
+      "season": [
+        5,
+        9
+      ],
+      "hotWeatherFavourite": true,
+      "fit": {
+        "b": 3,
+        "t": 5,
+        "p": 5,
+        "s": 5
+      },
+      "facilities": {
+        "changing": "yes",
+        "stroller": "yes",
+        "highchair": "no",
+        "playArea": "yes"
+      },
       "url": "https://www.berlin.de/",
-      "tags": ["lake", "swimming", "summer"],
-      "note": "Shallow lake entry, good for little ones in summer."
-    },
-    {
-      "id": "schwimmhalle",
-      "name": "Indoor pool with toddler area",
-      "where": "check your nearest Berliner Bäder pool",
-      "lat": 52.5330, "lon": 13.3760, "approxCoords": true,
-      "setting": "indoor", "covered": 1,
-      "free": false, "priceHint": "€",
-      "typicalOpen": "07:00", "typicalClose": "20:00", "closedDay": null,
-      "fit": { "b": 4, "t": 5, "p": 4, "s": 4 },
-      "facilities": { "changing": "yes", "stroller": "yes", "highchair": "no", "playArea": "no" },
-      "url": "https://www.berlinerbaeder.de/",
-      "tags": ["swimming", "warm water"],
-      "note": "Placeholder: replace with the pool you actually use, and fix its coordinates."
+      "tags": [
+        "lake",
+        "swimming",
+        "summer"
+      ],
+      "note": "Flacher Einstieg, im Sommer gut für die Kleinen."
     }
   ]
 }

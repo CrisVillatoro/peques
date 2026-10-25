@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { distanceKm, rankPlaces, weatherSentence, whySentence } from "../lib/rules";
 import { countBySource, mergePlaces } from "../lib/merge";
 import { expand, KINDS, labelFor } from "../lib/places";
@@ -9,7 +9,7 @@ import { QUICK_PLACES, RADIUS_OPTIONS, searchPlaces } from "../lib/geocode";
 import {
   dayOptions,
   daysAhead,
-  defaultSlot,
+  defaultWhen,
   describeWhen,
   isoDate,
   resolveWhen,
@@ -55,8 +55,8 @@ export default function PequesApp({ places: seedPlaces, food }) {
   const [bytes, setBytes] = useState({ loaded: 0, total: 0 });
   const [kids, setKids] = useState(DEFAULT_KIDS);
   const [choice, setChoice] = useState("auto");
-  const [dateIso, setDateIso] = useState(() => isoDate(new Date()));
-  const [slotKey, setSlotKey] = useState(() => defaultSlot());
+  const [dateIso, setDateIso] = useState(() => defaultWhen().date);
+  const [slotKey, setSlotKey] = useState(() => defaultWhen().slot);
   const [origin, setOrigin] = useState(BERLIN);
   const [maxKm, setMaxKm] = useState(5);
   const [showWhere, setShowWhere] = useState(false);
@@ -71,6 +71,8 @@ export default function PequesApp({ places: seedPlaces, food }) {
   const [view, setView] = useState("list"); // list | map
   const [kindFilter, setKindFilter] = useState(null); // null = every category
   const [shown, setShown] = useState(12);
+  const [controlsOpen, setControlsOpen] = useState(false);
+  const firstRun = useRef(true);
   const [openId, setOpenId] = useState(null);
 
   const t = useMemo(() => translator(lang), [lang]);
@@ -247,6 +249,13 @@ export default function PequesApp({ places: seedPlaces, food }) {
     return (ranking.browse || []).filter((r) => !taken.has(r.place.id));
   }, [ranking, picks]);
 
+  // open on an answer, not on a form
+  useEffect(() => {
+    if (library === "loading" || !firstRun.current) return;
+    firstRun.current = false;
+    setPhase("results");
+  }, [library]);
+
   const find = () => {
     setPhase("searching");
     setOpenId(null);
@@ -279,6 +288,24 @@ export default function PequesApp({ places: seedPlaces, food }) {
       <section className="panel">
         <h1 className="hello">{t(greetingKey())}<br /><em>{t("greeting.question")}</em></h1>
 
+        <button
+          type="button"
+          className="summary"
+          aria-expanded={controlsOpen}
+          onClick={() => setControlsOpen((v) => !v)}
+        >
+          <span>
+            {[
+              localLabel(origin, t),
+              whenLabel,
+              withAges.filter((k) => k.coming).map((k) => ageLabel(k.months)).join(" + ") || t("kids.none"),
+              maxKm ? `${maxKm} km` : t("far.all"),
+            ].join(" · ")}
+          </span>
+          <span className="summary-action">{controlsOpen ? t("controls.hide") : t("controls.show")}</span>
+        </button>
+
+        <div className="controls" hidden={!controlsOpen}>
         <div className="ctx">
           <button className="tag" type="button" onClick={() => setShowWhere((v) => !v)} aria-expanded={showWhere}>
             📍 {locating ? t("where.locating") : localLabel(origin, t)} <span className="change">{t("where.change")}</span>
@@ -425,6 +452,8 @@ export default function PequesApp({ places: seedPlaces, food }) {
             ? t("setting.outdoorRain")
             : t("setting.outdoorFirst")}
         </p>
+
+        </div>
 
         <button className="find" type="button" onClick={find} disabled={phase === "searching" || library === "loading"}>
           <span>
@@ -617,31 +646,56 @@ function PlaceCard({ r, rank, mode, weather, food, open, onToggle, t }) {
   return (
     <article className={`card ${rank === 0 ? "top" : "small"}`}>
       <div className="art">
-        <Art kind={p.tags?.[0] || p.setting} />
+        <Art kind={p.tags?.[0] || p.setting} seed={p.id} />
         {rank === 0 && <span className="rank">{t("results.top")}</span>}
       </div>
       <div className="cbody">
         <div className="cname">{p.name}</div>
-        <div className="cwhere">{p.where} · {p.priceHint}</div>
+        <div className="cwhere">{p.where} · {p.free ? t("card.free") : p.priceHint}</div>
         <div className="meta">
           {labelFor(p) && <span className="m kind">{labelFor(p)}</span>}
           <span className={`m ${p.setting}`}>{t(`card.${p.setting}`)}</span>
           <span className="m">{r.travel.minutes} {t(r.travel.mode === "walk" ? "card.walk" : "card.transit")}</span>
           <span className="m">{r.km.toFixed(1)} km</span>
           <span className="m fit">{t(r.fit >= 4.5 ? "card.fitGreat" : r.fit >= 3.5 ? "card.fitGood" : "card.fitOk")}</span>
-          <span className="m">{t("card.typical")} {p.typicalOpen}–{p.typicalClose}</span>
+          <span className={`m ${p.openingHours ? "known" : ""}`}>
+            {p.openingHours
+              ? p.openingHours
+              : p.typicalOpen === "00:00" && p.typicalClose === "23:59"
+              ? t("card.alwaysOpen")
+              : `${t("card.typical")} ${p.typicalOpen}–${p.typicalClose}`}
+          </span>
         </div>
-        <p className="why"><b>{t("card.why")}</b> {whySentence(r, mode, weather, t)}</p>
+        <p className="why">
+          <b>{t("card.why")}</b> {whySentence(r, mode, weather, t)}
+          {extraReason(p, t) && <> {extraReason(p, t)}</>}
+        </p>
 
         {open && (
           <>
             {p.note && <p className="note-text">{p.note}</p>}
-            <div className="facts">
-              <Fact label={t("card.changing")} value={p.facilities.changing} t={t} />
-              <Fact label={t("card.stroller")} value={p.facilities.stroller} t={t} />
-              <Fact label={t("card.highchair")} value={p.facilities.highchair} t={t} />
-              <Fact label={t("card.playArea")} value={p.facilities.playArea} t={t} />
-            </div>
+            {(() => {
+              const known = [
+                ["changing", t("card.changing")],
+                ["stroller", t("card.stroller")],
+                ["highchair", t("card.highchair")],
+                ["playArea", t("card.playArea")],
+                ["toilets", t("card.toilets")],
+              ].filter(([key]) => p.facilities?.[key] === "yes" || p.facilities?.[key] === "no");
+
+              if (!known.length) return <p className="nofacts">{t("card.noFacts")}</p>;
+              return (
+                <div className="facts">
+                  {known.map(([key, label]) => (
+                    <div key={key} className={`fact ${p.facilities[key]}`}>
+                      <span className="f-label">{label}</span>
+                      <b>{t(p.facilities[key] === "yes" ? "card.yes" : "card.no")}</b>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+
             {nearbyFood.length > 0 && (
               <>
                 <p className="label">{t("card.thenWhat")}</p>
@@ -675,6 +729,15 @@ function PlaceCard({ r, rank, mode, weather, food, open, onToggle, t }) {
       </div>
     </article>
   );
+}
+
+/** One concrete detail the chips don't already show. */
+function extraReason(p, t) {
+  if (p.facilities?.changing === "yes" && p.facilities?.highchair === "yes") return t("why.wellEquipped");
+  if (p.facilities?.changing === "yes") return t("why.changing");
+  if (p.note) return p.note;
+  if (p.minAge) return t("why.fromAge", { age: p.minAge });
+  return null;
 }
 
 function Fact({ label, value, t }) {

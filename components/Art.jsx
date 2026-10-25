@@ -7,13 +7,21 @@ const BG = {
   art: "#F3EEE6", experiments: "#FFF3D1", running: "#E3F5DD", "indoor halls": "#ECE7FD",
 };
 
-export default function Art({ kind }) {
+export default function Art({ kind, seed = "" }) {
   const bg = BG[kind] || "#EEF5F2";
   const scene = sceneFor(kind);
+  // the same category drawn slightly differently per place: the sun moves,
+  // the ground line shifts, so a list of playgrounds doesn't look copied
+  const n = [...String(seed)].reduce((a, c) => a + c.charCodeAt(0), 0);
+  const shift = (n % 7) * 14 - 42;
+  const flip = n % 3 === 0;
+  const hill = 104 + (n % 5) * 6;
   return (
     <svg viewBox="0 0 360 140" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
       <rect width="360" height="140" fill={bg} />
-      {scene}
+      <circle cx={300 - shift} cy={26 + (n % 4) * 5} r={18 + (n % 3) * 3} fill="#FFC845" opacity="0.9" />
+      <path d={`M0 ${hill} Q120 ${hill - 22} 240 ${hill - 4} T360 ${hill - 10} V140H0z`} fill="#9ED98B" opacity="0.55" />
+      <g transform={flip ? "translate(360,0) scale(-1,1)" : undefined}>{scene}</g>
     </svg>
   );
 }
