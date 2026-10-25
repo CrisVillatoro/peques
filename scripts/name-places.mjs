@@ -65,7 +65,9 @@ for (const p of places) {
   } else {
     const near = nearest(landmarks, lat, lon);
     if (near && near.m <= NEAR_M) {
-      full = `${name} am ${near.name}`;
+      // "Spielplatz am Spielplatz an der Volksbühne" — if the landmark is
+      // itself a playground, take its name rather than stacking the word
+      full = /spielplatz|playground/i.test(near.name) ? near.name : `${name} am ${near.name}`;
       byLandmark++;
     } else if (area && area !== "Berlin") {
       full = `${name} in ${area}`;
