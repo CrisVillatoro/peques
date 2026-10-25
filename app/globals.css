@@ -365,3 +365,18 @@ button.tag { cursor: pointer; }
 .morebtn:hover { border-color: var(--ink); }
 
 @media (min-width: 1180px) { .results .browse, .results .browse-label, .results .morebtn, .results .kinds { grid-column: 1 / -1; } }
+
+/* ---------- loading the place library ---------- */
+.loading {
+  display: flex; gap: 14px; align-items: center; margin-top: 22px;
+  background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 16px 18px;
+}
+.loading b { display: block; font: 800 16px var(--display); }
+.loading span { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; }
+.spinner.small {
+  width: 34px; height: 34px; margin: 0; flex: none;
+}
+.spinner.small::after { inset: 5px; }
+.bar { margin-top: 8px; height: 5px; border-radius: 3px; background: var(--bg); overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--green); border-radius: 3px; transition: width 0.2s ease; }
+@media (min-width: 1180px) { .results .loading { grid-column: 1 / -1; } }

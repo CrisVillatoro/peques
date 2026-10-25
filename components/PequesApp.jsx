@@ -52,6 +52,7 @@ export default function PequesApp({ places: seedPlaces, food }) {
   const [lang, setLang] = useState("de");
   const [imported, setImported] = useState([]);
   const [library, setLibrary] = useState("loading"); // loading | ready | seed-only
+  const [bytes, setBytes] = useState({ loaded: 0, total: 0 });
   const [kids, setKids] = useState(DEFAULT_KIDS);
   const [choice, setChoice] = useState("auto");
   const [dateIso, setDateIso] = useState(() => isoDate(new Date()));
@@ -122,15 +123,42 @@ export default function PequesApp({ places: seedPlaces, food }) {
   // page opens fast and the big file is fetched once and cached by the browser
   useEffect(() => {
     let cancelled = false;
-    fetch("places-osm.json")
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error("not found"))))
-      .then((d) => {
+
+    (async () => {
+      try {
+        const res = await fetch("places-osm.json");
+        if (!res.ok) throw new Error("not found");
+
+        // read it in chunks so the page can say how far along it is
+        const total = Number(res.headers.get("content-length")) || 0;
+        setBytes({ loaded: 0, total });
+        let text = "";
+        if (res.body && typeof res.body.getReader === "function") {
+          const reader = res.body.getReader();
+          const decoder = new TextDecoder();
+          let loaded = 0;
+          for (;;) {
+            const { done, value } = await reader.read();
+            if (done || cancelled) break;
+            loaded += value.length;
+            text += decoder.decode(value, { stream: true });
+            setBytes({ loaded, total });
+          }
+          text += decoder.decode();
+        } else {
+          text = await res.text();
+        }
         if (cancelled) return;
+
+        const d = JSON.parse(text);
         const list = (Array.isArray(d.places) ? d.places : []).map(expand);
         setImported(list);
         setLibrary(list.length ? "ready" : "seed-only");
-      })
-      .catch(() => !cancelled && setLibrary("seed-only"));
+      } catch (e) {
+        if (!cancelled) setLibrary("seed-only");
+      }
+    })();
+
     return () => { cancelled = true; };
   }, []);
 
@@ -398,7 +426,7 @@ export default function PequesApp({ places: seedPlaces, food }) {
             : t("setting.outdoorFirst")}
         </p>
 
-        <button className="find" type="button" onClick={find} disabled={phase === "searching"}>
+        <button className="find" type="button" onClick={find} disabled={phase === "searching" || library === "loading"}>
           <span>
             {t("find.button")}
             <small>
@@ -412,7 +440,27 @@ export default function PequesApp({ places: seedPlaces, food }) {
       </section>
 
       <section className="results" aria-live="polite">
-        {phase === "home" && (
+        {library === "loading" && (
+          <div className="loading" role="status" aria-live="polite">
+            <div className="spinner small" />
+            <div>
+              <b>{t("loading.title")}</b>
+              <span>
+                {bytes.total
+                  ? t("loading.sub", {
+                      percent: Math.min(99, Math.round((bytes.loaded / bytes.total) * 100)),
+                      size: `${(bytes.total / 1024 / 1024).toFixed(1)} MB`,
+                    })
+                  : t("loading.subPlain")}
+              </span>
+              {bytes.total > 0 && (
+                <div className="bar"><i style={{ width: `${Math.min(100, (bytes.loaded / bytes.total) * 100)}%` }} /></div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {phase === "home" && library !== "loading" && (
           <div className="placeholder">
             <div className="placeholder-art"><Art kind="park" /></div>
             <p>{t("results.placeholder", { button: t("find.button") })}</p>
