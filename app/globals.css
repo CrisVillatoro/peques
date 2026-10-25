@@ -304,6 +304,7 @@ button.tag { cursor: pointer; }
   border: 1px solid var(--line); background: #e5eee9; z-index: 0;
 }
 @media (min-width: 900px) { .map { height: 480px; } }
+.pin-wrap { width: 32px; height: 32px; cursor: pointer; }
 .pin {
   display: grid; place-items: center; font: 800 13px var(--display); color: #fff;
   width: 32px; height: 32px; border-radius: 50% 50% 50% 4px; transform: rotate(45deg);
@@ -311,7 +312,7 @@ button.tag { cursor: pointer; }
   border: 2px solid #fff; transition: transform 0.12s ease;
 }
 .pin b { transform: rotate(-45deg); display: block; }
-.pin:hover { transform: rotate(45deg) scale(1.08); }
+.pin-wrap:hover .pin { transform: rotate(45deg) scale(1.08); }
 .pin.top { background: var(--green); }
 .pin.alt { background: var(--ink); }
 

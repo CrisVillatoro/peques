@@ -212,8 +212,8 @@ export default function ResultsMap({ origin, maxKm, results, others = [], onPick
 
 function pin(number, isTop) {
   const el = document.createElement("div");
-  el.className = `pin ${isTop ? "top" : "alt"}`;
-  el.innerHTML = `<b>${number}</b>`;
+  el.className = "pin-wrap";
+  el.innerHTML = `<span class="pin ${isTop ? "top" : "alt"}"><b>${number}</b></span>`;
   return el;
 }
 
