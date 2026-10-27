@@ -1,0 +1,32 @@
+# Peques on IONOS webspace (Apache).
+#
+# The places library is ~0.9 MB of JSON; compressed it goes over the wire at
+# roughly a fifth of that. Everything here is about making the first visit on
+# a phone quick.
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml
+  AddOutputFilterByType DEFLATE application/javascript application/json
+  AddOutputFilterByType DEFLATE application/manifest+json image/svg+xml
+</IfModule>
+
+<IfModule mod_mime.c>
+  AddType application/manifest+json .webmanifest
+  AddType application/json .json
+</IfModule>
+
+<IfModule mod_expires.c>
+  ExpiresActive On
+  # the app's own build output carries a hash in its name: cache it hard
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType image/png "access plus 1 month"
+  # the places file changes when you re-import: a day is a fair compromise
+  ExpiresByType application/json "access plus 1 day"
+  ExpiresByType text/html "access plus 10 minutes"
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>

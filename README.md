@@ -60,30 +60,39 @@ Open `data/places.json` and edit it like a list, not like code:
 Tuning the suggestions lives in `lib/rules.js`: rain and temperature limits,
 and how much age fit, travel time and weather count. Plain numbers, no AI.
 
-## 5. Publish it on your subdomain
+## 5. Publish it on your IONOS subdomain
+
+Exactly how Iris is published: build locally, upload a folder.
 
 ```bash
-npm run build
+npm install     # only needed when dependencies changed
+npm run build   # writes the folder out/
 ```
 
-This creates a folder called **`out/`** with plain HTML, CSS and JavaScript —
-no server needed.
+In IONOS, once:
 
-1. Decide the address, e.g. `peques.cristavillatoro.com`.
-2. In IONOS, create that subdomain and point it at its own folder in your
-   webspace (the same setup you used for Iris).
-3. Upload **the contents of `out/`** (not the folder itself) into that folder,
-   with your usual FTP client or the IONOS file manager.
-4. Open the address on your phone and choose *Share → Add to Home Screen*. It
-   then behaves like an app, with its own icon.
+1. **Domains & SSL → cristavillatoro.com → Subdomains → Add**: `peques`.
+2. Point it at its **own folder** in the webspace, e.g. `/peques`, not at the
+   folder the main site uses.
+3. Turn on the free SSL certificate for the subdomain.
 
-To update later: edit the places, run `npm run build` again, upload `out/` again.
+Then every time you publish:
 
-### If you'd rather not upload by hand
+4. Upload **the contents of `out/`** — not the folder itself — into that
+   webspace folder, with your FTP client or the IONOS file manager.
+   `.htaccess` is included: it gzips the places file (0.9 MB becomes roughly
+   200 KB over the wire) and sets sensible caching.
 
-Push this folder to GitHub and connect it to any static host (IONOS Deploy Now,
-Netlify, Cloudflare Pages, Vercel). They run `npm run build` for you on every
-push. The app doesn't need a server either way.
+Check `https://peques.cristavillatoro.com` on your phone, then
+*Share → Add to Home Screen* for an app icon.
+
+**When you change something**, run `npm run build` again and upload `out/`
+again. Only the files that changed need re-uploading, but uploading all of it
+is simpler and harmless.
+
+**Hidden files**: some FTP clients don't show `.htaccess`. If yours doesn't,
+enable "show hidden files", or the compression won't be there — the app still
+works, just slower on the first visit.
 
 ## 6. Share it with friends
 
